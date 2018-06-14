@@ -637,7 +637,12 @@ public class SamplerMainClass {
 		
 		
 		while(currWindow.getDataFile() == null) {
-			Thread.sleep(1500);
+			try {
+				Thread.sleep(1500);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
 		String dataFileName = currWindow.getDataFile().getAbsolutePath();
@@ -646,32 +651,25 @@ public class SamplerMainClass {
 		int nClaimsInDataFile = 0;
 				
 		/* Read in summary claims data */
-		nClaimsInDataFile = SampleData.loadClaimsDataFromSas(claimsData,dataFileName);
-//		nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
-
+		while(currWindow.comboBox.getSelectedItem() == null || currWindow.comboBox.getSelectedItem().equals("Select Type")) {
+			System.out.println("Waiting" + currWindow.comboBox.getSelectedItem());
+			try {
+				Thread.sleep(500);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if(currWindow.comboBox.getSelectedItem().equals("Standard (Obs Num, Claim Id, etc..)")) {
+			nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
+		}else if (currWindow.comboBox.getSelectedItem().equals("From Sas (Amount and Freq")){
+			nClaimsInDataFile = SampleData.loadClaimsDataFromSas(claimsData,dataFileName);
+		}else {
+			System.out.println("FAILURE");
+		}
+		
 		portClaimsData = claimsData;
-		System.out.println("Read in "+nClaimsInDataFile+" claims.  Sorting...");
+
 		
-		
-		
-//		/* Test the claimsData ArrayList */
-//		DataItem data3 = new DataItem(3,"300","003",5.00);
-//		data3.setStratumNum(2);
-//		claimsData.add(data3);
-//		DataItem data1 = new DataItem(1,"100","001",15.00);
-//		data1.setStratumNum(3);
-//		claimsData.add(data1);
-//		DataItem data2 = new DataItem(2,"200","002",10.00);
-//		data2.setStratumNum(4);
-//		claimsData.add(data2);
-//		for (int i=0; i<claimsData.size(); i++) {
-//			System.out.println(claimsData.get(i).getObsNum()+", "+claimsData.get(i).getClaimID()+", "+claimsData.get(i).getLineNum()+", "+claimsData.get(i).getAmount()+", "+claimsData.get(i).getStratumNum());			
-//		}
-//		System.out.println("");
-//		Collections.sort(claimsData);
-//		for (int i=0; i<claimsData.size(); i++) {
-//			System.out.println(claimsData.get(i).getObsNum()+", "+claimsData.get(i).getClaimID()+", "+claimsData.get(i).getLineNum()+", "+claimsData.get(i).getAmount()+", "+claimsData.get(i).getStratumNum());			
-//		}
 		double perdif;
 		do {
 			double tmptotal = 0;
@@ -698,12 +696,16 @@ public class SamplerMainClass {
 			finStrata = majorStrata;
 			dataProcessed = true;
 			double x = getPopMean(claimsData);
+			currWindow.lblMeanClaimAmnt.setText(String.valueOf(x));
 			System.out.println("Pop mean: " + x);
 			double y = getWeightedSampleMean(sampleClaims, finStrata);
+			currWindow.WeightedSampleMeanVal.setText(String.valueOf(y));
 			System.out.println("Weighted sample mean: " + y);
 			double abDiff = getAbsDiff(x, y);
+			currWindow.AbsoluteDiffVal.setText(String.valueOf(abDiff));
 			System.out.println("Absolute Difference: " + abDiff);
 			perdif = getPerDiff(getAbsDiff(x, y), x);
+			currWindow.PercentageDiffVal.setText(String.valueOf(perdif) + "%");
 			System.out.println("Percentage difference: " + getPerDiff(getAbsDiff(x, y), x) + "%");
 			if((perdif < 1.0) == false) {
 				trialStrata.clear();
@@ -713,7 +715,11 @@ public class SamplerMainClass {
 			/*  Clean up  */
 			//		conn.close();
 		} while (perdif > 1.0);
-
+		
+		currWindow.lblMeanClaimAmnt.setVisible(true);
+		currWindow.WeightedSampleMeanVal.setVisible(true);
+		currWindow.AbsoluteDiffVal.setVisible(true);
+		currWindow.PercentageDiffVal.setVisible(true);
 		
 	}
 	public static ArrayList<Stratum> getMajorStrata() {
@@ -729,7 +735,7 @@ public class SamplerMainClass {
 				size++;
 			}
 		//}
-		return total / size;
+		return roundToTwo(total / size);
 	}
 	
 	public static double getWeightedSampleMean(ArrayList<DataItem> sampleCLaims, ArrayList<Stratum> finStrata) {
@@ -755,15 +761,20 @@ public class SamplerMainClass {
 			divisor++;
 			//System.out.println(result);
 		}
-		return (result / (divisor));
+		return roundToTwo((result / (divisor)));
 	}
 	
 	public static double getAbsDiff(double x, double y) {
-		return Math.abs(x-y);
+		return roundToTwo(Math.abs(x-y));
 	}
 	
 	public static double getPerDiff(double diff, double popMean) {
-		return (Math.abs(diff / popMean) * 100);
+		return roundToTwo((Math.abs(diff / popMean) * 100));
+	}
+	
+	public static double roundToTwo(double num) {
+		double x = num * 1000;
+		return (Math.round(x) / 1000.0);
 	}
 	
 	
