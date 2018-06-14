@@ -423,14 +423,14 @@ class CreateSample {
 	}
 
 	public static void setStrataClaimPos(ArrayList<Stratum> strata) {
-			
-	/* Set the first/last claimPos variable for each stratum */
-	int curClaimPos = 0; //position in the claimsData array
-	for (int i=0; i<strata.size(); i++) {
-		strata.get(i).setFirstClaimPos(curClaimPos);
-		curClaimPos = curClaimPos + strata.get(i).getStratumNumClaims()-1;
-		strata.get(i).setLastClaimPos(curClaimPos);
-		curClaimPos++;
+				
+		/* Set the first/last claimPos variable for each stratum */
+		int curClaimPos = 0; //position in the claimsData array
+		for (int i=0; i<strata.size(); i++) {
+			strata.get(i).setFirstClaimPos(curClaimPos);
+			curClaimPos = curClaimPos + strata.get(i).getStratumNumClaims()-1;
+			strata.get(i).setLastClaimPos(curClaimPos);
+			curClaimPos++;
 	}
 }
 

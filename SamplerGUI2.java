@@ -168,14 +168,16 @@ public class SamplerGUI2 {
 					System.out.println("IMPROPER FORMAT");
 					desFileName += ".csv";
 				}
-				while(SamplerMainClass.sampleClaims.isEmpty()) {
+				while(SamplerMainClass.dataProcessed == false) {
 					try {
-						Thread.sleep(3000);
+						Thread.sleep(1000);
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}
 				}
-				CSVWriter.writeCsvFile(desFileName, SamplerMainClass.sampleClaims);
+				
+				CSVWriter.writeSampleFile(desFileName, SamplerMainClass.sampleClaims);
+				CSVWriter.writeStatFile("stats.csv", SamplerMainClass.getMajorStrata());
 				finishNotice.setVisible(true);
 			}
 		});

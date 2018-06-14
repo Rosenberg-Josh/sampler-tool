@@ -232,6 +232,14 @@ class DataItem implements Comparable<DataItem> {
 		this.amount = d.amount;
 		this.stratumNum = d.stratumNum;
 	}
+	/* Constructor */
+	public DataItem(int amount) {
+		obsNum = 0;
+		claimID = null;
+		lineNum = null;
+		this.amount = amount;
+		stratumNum = -1;
+	}
 	/* Function to set obsNum */
 	public void setObsNum(int o) {
 		obsNum = o;
@@ -302,7 +310,7 @@ class SampleData {
 		// define the driver to use 
 		 String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 		// define the Derby connection URL to use 
-		 String connectionURL = "jdbc:derby:" + dbName + ";create=true";
+		 String connectionURL = "jdbc:sqlserver:" + dbName + ";ReadOnly=true";
 		// the Sampler database connection -- return value
 		Connection conn = null;
 		 
@@ -448,6 +456,36 @@ class SampleData {
 		return status;	
 	}
 	
+	public static ArrayList<DataItem> readData(Connection conn, String client_id, String client_name) throws SQLException{
+
+		String sqlCommand = "";
+		Statement s;
+		int status = 0;  // status flag: 1 = ok;
+
+		s = conn.createStatement();
+		ResultSet rs;
+		sqlCommand = "Select client_id" + 
+				"                ,client_name" + 
+				"from odwrs_test.dbo.tbl_clients" + 
+				"order by left(client_name,charindex('(',client_name))" + 
+				"                ,client_id";
+
+		s.execute(sqlCommand);
+		sqlCommand = "Select top 999 Claim_Number" + 
+				"                                ,Line_Number" + 
+				"                                ,paid_amount" + 
+				"                                ,rec_id" + 
+				"                from odwrs_test.dbo.tbl_claims_66114";
+		System.out.println("");
+		
+		
+		
+		
+		
+		ArrayList<DataItem> result = new ArrayList<DataItem>();
+		return result;
+		
+	}
 	
 	public static int loadClaimsData(ArrayList<DataItem> dataList, String dataFileName) throws FileNotFoundException {
 		
@@ -490,6 +528,46 @@ class SampleData {
 		in.close();		
 		return nLoaded;	
 	}
+	
+	public static int loadClaimsDataFromSas(ArrayList<DataItem> dataList, String dataFileName) throws FileNotFoundException {
+		
+		int nLoaded = -1;  //-1 = Error, nothing loaded; positive n = number of claims loaded
+		
+		/* Open the data file */
+		File inputFile = new File(dataFileName);
+		Scanner in = new Scanner(inputFile);
+		System.out.println(in);
+		
+		/* Read in the data file */
+		//First the header line -- throw this away
+		if (in.hasNext()) { 
+			String inputLine = "";
+			inputLine = in.nextLine();
+		}
+		//Then the rest of the file -- load into the data array
+		nLoaded = 0;
+		while (in.hasNext()) {
+			String inputLine = "";
+			String junk = "";
+			inputLine = in.nextLine();
+			Scanner lineToParse = new Scanner(inputLine).useDelimiter(",");
+			int amount = lineToParse.nextInt();
+			int freq = lineToParse.nextInt();
+			if (amount >= 0) {  //Don't load negative claims --> THIS NEEDS TO BE BETTER ADDRESSED
+				while(freq > 0) {
+					DataItem newClaim = new DataItem(amount);
+					dataList.add(newClaim);
+					nLoaded++;
+					freq--;
+				}
+				}
+
+			lineToParse.close();
+		}
+		
+		in.close();		
+		return nLoaded;	
+	}
 }
 
 public class SamplerMainClass {
@@ -504,14 +582,22 @@ public class SamplerMainClass {
  * @throws InterruptedException 
  */
 	
+	/* Claims to be accessed outside of class*/
 	public static ArrayList<DataItem> sampleClaims;
 	
+	public static ArrayList<Stratum> finStrata;
 	
+	public static ArrayList<DataItem> portClaimsData;
+	
+	/*Boolean to check weather sampling is complete*/
+	public static boolean dataProcessed = false;
+	
+
 	public static void main(String[] args) throws FileNotFoundException, SQLException, InterruptedException {
 		
 		/* Global input variables */
 		int nTotalSamples = 225;  //the total number of samples
-		int minSamplesPerStratum = 6;  //min samples per stratum (if possible)
+		int minSamplesPerStratum = 9;  //min samples per stratum (if possible)
 		int nZeroDollarSamples = 10;  //total number of zero dollar claim samples
 		int nTopNSamples = 25;  //the number of Top N samples, which will be 100% audited
 		int nStratSamples = nTotalSamples - nZeroDollarSamples - nTopNSamples; //the number of samples in the stratified sample group
@@ -527,7 +613,8 @@ public class SamplerMainClass {
 		ArrayList<Stratum> majorStrata = new ArrayList<>();  // holds the final Major Strata
 		sampleClaims = new ArrayList<>();  //holds the claims sample that is drawn
 		SamplerGUI2 currWindow = new SamplerGUI2();
-//		/* Database connection */
+//		
+		/* Database connection */
 //		Connection conn = null;
 //				
 //		/* Open Sampler database connection */
@@ -559,21 +646,13 @@ public class SamplerMainClass {
 		int nClaimsInDataFile = 0;
 				
 		/* Read in summary claims data */
-		nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
+		nClaimsInDataFile = SampleData.loadClaimsDataFromSas(claimsData,dataFileName);
+//		nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
+
+		portClaimsData = claimsData;
 		System.out.println("Read in "+nClaimsInDataFile+" claims.  Sorting...");
-		double tmptotal = 0;
-		for (int i=0; i<nClaimsInDataFile; i++){
-			tmptotal = tmptotal+claimsData.get(i).getAmount();
-		}
-		System.out.format("Total claims amount: %f",tmptotal);
-		System.out.println("");
-		Collections.sort(claimsData);
-		System.out.println("Sort done.  Here are the first 10 records...");
-		System.out.format("Total claims amount: %f",tmptotal);
-		System.out.println("");
-//		for (int i=0; i<10; i++) {
-//			System.out.println(claimsData.get(i).getObsNum()+", "+claimsData.get(i).getClaimID()+", "+claimsData.get(i).getLineNum()+", "+claimsData.get(i).getAmount());			
-//		}
+		
+		
 		
 //		/* Test the claimsData ArrayList */
 //		DataItem data3 = new DataItem(3,"300","003",5.00);
@@ -593,18 +672,100 @@ public class SamplerMainClass {
 //		for (int i=0; i<claimsData.size(); i++) {
 //			System.out.println(claimsData.get(i).getObsNum()+", "+claimsData.get(i).getClaimID()+", "+claimsData.get(i).getLineNum()+", "+claimsData.get(i).getAmount()+", "+claimsData.get(i).getStratumNum());			
 //		}
-		
-		/* Determine the strata */
-		CreateSample.defineStrata(claimsData, trialStrata, majorStrata, nTrialStrata, nZeroDollarSamples, nTopNSamples, nTotalSamples, nMajorStrata, minSamplesPerStratum);
-		
-		/* Draw and test the sample */
-		CreateSample.drawSample(claimsData, sampleClaims, majorStrata, nZeroDollarSamples, nTopNSamples, nStratSamples, nTotalSamples, nMajorStrata);
-		
-		
-		/*  Clean up  */
-//		conn.close();
+		double perdif;
+		do {
+			double tmptotal = 0;
+			for (int i = 0; i < nClaimsInDataFile; i++) {
+				tmptotal = tmptotal + claimsData.get(i).getAmount();
+			}
+			System.out.format("Total claims amount: %f", tmptotal);
+			System.out.println("");
+			Collections.sort(claimsData);
+			System.out.println("Sort done.  Here are the first 10 records...");
+			System.out.format("Total claims amount: %f", tmptotal);
+			System.out.println("");
+			//		for (int i=0; i<10; i++) {
+			//			System.out.println(claimsData.get(i).getObsNum()+", "+claimsData.get(i).getClaimID()+", "+claimsData.get(i).getLineNum()+", "+claimsData.get(i).getAmount());			
+			//		}
+			/* Determine the strata */
+			CreateSample.defineStrata(claimsData, trialStrata, majorStrata, nTrialStrata, nZeroDollarSamples,
+					nTopNSamples, nTotalSamples, nMajorStrata, minSamplesPerStratum);
+			/* Draw and test the sample */
+			CreateSample.drawSample(claimsData, sampleClaims, majorStrata, nZeroDollarSamples, nTopNSamples,
+					nStratSamples, nTotalSamples, nMajorStrata);
+			
+			
+			finStrata = majorStrata;
+			dataProcessed = true;
+			double x = getPopMean(claimsData);
+			System.out.println("Pop mean: " + x);
+			double y = getWeightedSampleMean(sampleClaims, finStrata);
+			System.out.println("Weighted sample mean: " + y);
+			double abDiff = getAbsDiff(x, y);
+			System.out.println("Absolute Difference: " + abDiff);
+			perdif = getPerDiff(getAbsDiff(x, y), x);
+			System.out.println("Percentage difference: " + getPerDiff(getAbsDiff(x, y), x) + "%");
+			if((perdif < 1.0) == false) {
+				trialStrata.clear();
+				majorStrata.clear();
+				sampleClaims.clear();
+			}
+			/*  Clean up  */
+			//		conn.close();
+		} while (perdif > 1.0);
 
 		
 	}
+	public static ArrayList<Stratum> getMajorStrata() {
+		return finStrata;
+	}
+	
+	public static double getPopMean(ArrayList<DataItem> claimData) {
+		double total = 0;
+		double size = 0; 
+		for (int i = 0; i < claimData.size(); i++) {
+			//if((claimData.get(i).amount < claimData.get(finStrata.get(21).firstClaimPos).amount)) {
+				total += claimData.get(i).amount;
+				size++;
+			}
+		//}
+		return total / size;
+	}
+	
+	public static double getWeightedSampleMean(ArrayList<DataItem> sampleCLaims, ArrayList<Stratum> finStrata) {
+		double result = 0;
+		double divisor = 0;
+		double totWeight = 0;
+		for(int i = 0; i < finStrata.size() - 1; i++) {
+			int currStratSize = 0;
+			double currStratAmnt = 0;
+			for(int j = 0; j < sampleCLaims.size(); j++) {
+				if (sampleClaims.get(j).stratumNum == i) {
+					currStratSize++;
+					currStratAmnt += sampleClaims.get(j).amount;
+					
+				}
+			}
+			double currMean = currStratAmnt / currStratSize;
+			//System.out.println("CURR MEAN " + currMean + " CURR STRAT SIZE " + currStratSize);
+			double weight = currStratSize / 200.0;
+			totWeight += weight;
+			//System.out.println("WEIGHT: " + weight);
+			result += (currMean * weight);
+			divisor++;
+			//System.out.println(result);
+		}
+		return (result / (divisor));
+	}
+	
+	public static double getAbsDiff(double x, double y) {
+		return Math.abs(x-y);
+	}
+	
+	public static double getPerDiff(double diff, double popMean) {
+		return (Math.abs(diff / popMean) * 100);
+	}
+	
+	
 
 }
