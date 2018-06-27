@@ -27,11 +27,17 @@ class CreateSample {
 		/* Populate the first stratum boundaries */
 		Stratum newStratum = new Stratum();
 		newStratum.setLowerBound(0);
-		newStratum.setUpperBound(0.001);
+		newStratum.setUpperBound(0);
 		trialStrata.add(newStratum);
 
+		/* Populate second stratum boundy */
+		newStratum = new Stratum();
+		newStratum.setLowerBound(0.001);
+		newStratum.setUpperBound(newStratum.getLowerBound()+stratumWidth);
+		trialStrata.add(newStratum);
+		 
 		/* Populate the remaining trialStrata boundaries */
-		for (int i=1; i<nTrialStrata+2; i++) {
+		for (int i=2; i<nTrialStrata+2; i++) {
 			newStratum = new Stratum();
 //			System.out.println("Stratum "+i+" upper bound = "+trialStrata.get(i-1).getUpperBound());
 			newStratum.setLowerBound(trialStrata.get(i-1).getUpperBound());
@@ -399,6 +405,7 @@ class CreateSample {
 		
 		/* Create the zero-dollar claim stratum */
 		Stratum newStratum = new Stratum(trialStrata.get(0));
+		newStratum.setUpperBound(0); //Not sure if this will still yield valid sample
 		newStratum.setStratumSampleSize(nZeroDollarSamples);
 		majorStrata.add(newStratum);
 		
@@ -406,7 +413,11 @@ class CreateSample {
 		int trialStrataPos = 1; //keeps track of which trialStrata we are on
 		for (int i=1; i<=nMajorStrata; i++){ //create each major stratified sample stratum
 			newStratum = new Stratum();
-			newStratum.setLowerBound(majorStrata.get(i-1).getUpperBound());
+			if(i == 1) {
+				newStratum.setLowerBound(0.01);
+			}else {
+				newStratum.setLowerBound(majorStrata.get(i-1).getUpperBound());
+			}
 			do {
 				newStratum.setUpperBound(trialStrata.get(trialStrataPos).getUpperBound());
 				trialStrataPos++;

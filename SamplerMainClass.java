@@ -168,25 +168,14 @@ class Stratum implements Comparable<Stratum> {
 	public int getLastClaimPos() {
 		return lastClaimPos;
 	}
+
+	@Override
+	public int compareTo(Stratum arg0) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 	
-	/* Comparison */
-	public int compareTo(Stratum otherOne) {  //THIS DOESN'T DO ANYTHING RIGHT NOW
-		int intVal = 0;
-		/*
-		double actVal = this.amount - otherOne.getAmount();
-		if (actVal <0) {
-			intVal = -1;
-		}
-		else {
-			if (actVal > 0) {
-				intVal = 1;
-			}
-			else {
-				intVal = 0;
-			}
-		} */
-		return intVal;
-	}	
+
 }
 
 class DataItem implements Comparable<DataItem> {
@@ -203,40 +192,30 @@ class DataItem implements Comparable<DataItem> {
 	 */
 	
 	protected int obsNum;
-	protected String claimID;
-	protected String lineNum;
 	protected double amount;
 	protected int stratumNum;
 	
 	/* Constructor */
 	public DataItem() {
 		obsNum = 0;
-		claimID = null;
-		lineNum = null;
 		amount = 0.0;
 		stratumNum = -1;
 	}
 	/* Constructor */
-	public DataItem(int o, String c, String l, double a) {
+	public DataItem(int o, double a) {
 		obsNum = o;
-		claimID = c;
-		lineNum = l;
 		amount = a;
 		stratumNum = -1;
 	}
 	/* Constructor */
 	public DataItem(DataItem d) {
 		this.obsNum = d.obsNum;
-		this.claimID = d.claimID;
-		this.lineNum = d.lineNum;
 		this.amount = d.amount;
 		this.stratumNum = d.stratumNum;
 	}
 	/* Constructor */
 	public DataItem(int amount) {
 		obsNum = 0;
-		claimID = null;
-		lineNum = null;
 		this.amount = amount;
 		stratumNum = -1;
 	}
@@ -248,22 +227,7 @@ class DataItem implements Comparable<DataItem> {
 	public int getObsNum() {
 		return obsNum;
 	}
-	/* Function to set claimID */
-	public void setClaimID(String c) {
-		claimID = c;
-	}
-	/* Function to get claimID */
-	public String getClaimID() {
-		return claimID;
-	}
-	/* Function to set lineNum */
-	public void setLineNum(String l) {
-		lineNum = l;
-	}
-	/* Function to get lineNum */
-	public String getLineNum() {
-		return lineNum;
-	}
+
 	/* Function to set amount */
 	public void setAmount(double a) {
 		amount = a;
@@ -324,137 +288,7 @@ class SampleData {
 		 return conn;
 	}
 
-	public static int makeNewDB(Connection conn) throws SQLException {
-		/** Creates the table structure for the Sampler DB.
-		 *  It assumes that the DB has been checked for existing tables and 
-		 *  that the UI is being managed elsewhere.  This just creates the tables.
-		 */
-		/* NOTE - CHANGE NEEDED:  The current definition of sampleID as an int means there can only be 65K sampleDefs.  
-		 * Probably want to change this.
-		 */
-		
-		String sqlCommand = "";
-		Statement s;
-		int status = 0;  // status flag: 1 = ok;
-		
-		s = conn.createStatement();
-		ResultSet rs;
-		
-		s.execute("Drop table tblDrawnSample");
-		s.execute("Drop table tblStrataDefs");
-		s.execute("Drop table tblSampleDefs");
-		s.execute("Drop table tblClients");
-		s.execute("Drop TABLE tblUsers");
-		sqlCommand = "CREATE TABLE tblUsers ("
-				+ "userId varchar(50) not null,"
-				+ "user_email varchar(100),"
-				+ "user_name varchar(100),"
-				+ "PRIMARY KEY (userId))";
-		s.execute(sqlCommand);
-		System.out.println("tblUsers created");
-		sqlCommand = "INSERT INTO tblUsers VALUES ('1001', 'noemail', 'User Name')";
-		s.execute(sqlCommand);
-		System.out.println("added new user");
-		sqlCommand = "CREATE TABLE tblClients ("
-				+ "BenefitPointID varchar(50) not null, "
-				+ "client_name varchar(100), "
-				+ "client_location varchar(100), "
-				+ "PRIMARY KEY(BenefitPointID))";
-		s.execute(sqlCommand);
-		System.out.println("tblClients created");	
-		sqlCommand = "INSERT INTO tblClients VALUES ('AB1001', 'COMPANY1', 'PRINCETON, NJ')";
-		s.execute(sqlCommand);
-		sqlCommand = "INSERT INTO tblClients VALUES ('CD1002', 'COMPANY2', 'BOSTON, MA')";
-		s.execute(sqlCommand);
-		System.out.println("added 2 new clients");
-		sqlCommand = "CREATE TABLE tblSampleDefs ("
-				+ "sampleDefID int not null,"
-				+ "sampleDescripton varchar(100),"
-				+ "clientBPID varchar(50)," 
-				+ "claimFileLoc varchar(200),"
-				+ "clientName varchar(100),"
-				+ "claimType varchar(50),"
-				+ "clientLocation varchar(100),"
-				+ "startDate date,"
-				+ "endDate date,"
-				+ "sampleDefCreateDate timestamp,"
-				+ "sampleDefModDate timestamp,"
-				+ "sampleSize int, "
-				+ "PRIMARY KEY (sampleDefID),"
-				+ "FOREIGN KEY (clientBPID) REFERENCES tblClients(BenefitPointID))";
-		s.execute(sqlCommand);
-		System.out.println("tblSampleDefs created");	
-		sqlCommand = "INSERT INTO tblSampleDefs VALUES ("
-				+ "1, 'SampleDef 1', 'AB1001',"
-				+ "'c:\\claimfile.csv',"
-				+ "'Client 1',"
-				+ "'MEDICAL',"
-				+ "'PRINCETON, NJ',"
-				+ "'2016-01-01',"
-				+ "'2016-12-31',"
-				+ "'2017-10-29 03:23:34.234',"
-				+ "'2017-10-29 03:23:34.234',"
-				+ "225)";
-		s.execute(sqlCommand);
-		System.out.println("added 1 new sampleDef");
-//		sqlCommand = "SELECT * FROM tblSampleDefs";
-//		rs = s.executeQuery(sqlCommand);
-//		while (rs.next()) {
-//			System.out.println(rs.getLong(1));
-//			System.out.println(rs.getString(2));
-//			System.out.println(rs.getString(3));
-//			System.out.println(rs.getString(4));
-//			System.out.println(rs.getString(5));
-//			System.out.println(rs.getString(6));
-//			System.out.println(rs.getString(7));
-//			System.out.println(rs.getDate(8));
-//			System.out.println(rs.getDate(9));
-//			System.out.println(rs.getTimestamp(10));
-//			System.out.println(rs.getTimestamp(11));
-//			System.out.println(rs.getInt(12));
-//		}
-		sqlCommand = "CREATE TABLE tblStrataDefs ("
-				+ "strataDefID int not null,"
-				+ "sampleDefID int,"
-				+ "stratumNum int," 
-				+ "lowerBound double,"
-				+ "upperBound double,"
-				+ "stratumNSamples int,"
-				+ "PRIMARY KEY (strataDefID),"
-				+ "FOREIGN KEY (sampleDefID) REFERENCES tblSampleDefs(sampleDefID))";
-		s.execute(sqlCommand);
-		System.out.println("tblStrataDefs created");	
-		sqlCommand = "INSERT INTO tblStrataDefs VALUES (1,1,0,-1.0,1.0,-1)";
-		s.execute(sqlCommand);
-		sqlCommand = "INSERT INTO tblStrataDefs VALUES (2,1,1,1.0,50.0,-1)";
-		s.execute(sqlCommand);
-		sqlCommand = "INSERT INTO tblStrataDefs VALUES (3,1,2,50.0,150.0,-1)";
-		s.execute(sqlCommand);
-		System.out.println("added 3 new strataDef records");
-		sqlCommand = "CREATE TABLE tblDrawnSample ("
-				+ "drawnSampleID int not null,"
-				+ "sampleDefID int,"
-				+ "strataDefID int,"
-				+ "drawDate timestamp," 
-				+ "sampleObsNum int,"
-				+ "claimfileObsNum bigint,"
-				+ "claimAmount double,"
-				+ "PRIMARY KEY (drawnSampleID),"
-				+ "FOREIGN KEY (sampleDefID) REFERENCES tblSampleDefs(sampleDefID),"
-				+ "FOREIGN KEY (strataDefID) REFERENCES tblStrataDefs(strataDefID))";
-		s.execute(sqlCommand);
-		System.out.println("tblDrawnSample created");	
-		sqlCommand = "INSERT INTO tblDrawnSample VALUES (1,1,1,'2017-10-29 03:23:34.234',1,15,0.15)";
-		s.execute(sqlCommand);
-		sqlCommand = "INSERT INTO tblDrawnSample VALUES (2,1,1,'2017-10-29 03:23:34.234',2,126,-.25)";
-		s.execute(sqlCommand);
-		sqlCommand = "INSERT INTO tblDrawnSample VALUES (3,1,2,'2017-10-29 03:23:34.234',3,1054,-.25)";
-		s.execute(sqlCommand);
-		System.out.println("added 3 new strataDef records");
-			
-		status = 1; // Set flag to OK
-		return status;	
-	}
+	
 	
 	public static ArrayList<DataItem> readData(Connection conn, String client_id, String client_name) throws SQLException{
 
@@ -490,41 +324,79 @@ class SampleData {
 	public static int loadClaimsData(ArrayList<DataItem> dataList, String dataFileName) throws FileNotFoundException {
 		
 		int nLoaded = -1;  //-1 = Error, nothing loaded; positive n = number of claims loaded
-		
 		/* Open the data file */
 		File inputFile = new File(dataFileName);
 		Scanner in = new Scanner(inputFile);
 		System.out.println(in);
 		
 		/* Read in the data file */
-		//First the header line -- throw this away
 		if (in.hasNext()) { 
-			String inputLine = "";
-			inputLine = in.nextLine();
+			int obsIndex = 999; //Used to refrece observation number from data
+			int amntIndex = 999; //Used to reference amnt paid from data
+			int obsNum = -1;
+			double amntPaid = -1;
+			String headLine = "";
+			headLine = in.nextLine(); //Header Line
+			Scanner headToParse = new Scanner(headLine).useDelimiter(","); //split header into iterative scanner
+			int index = 0; //Starting Index
+			while(headToParse.hasNext()) { //Iterate though entire header
+				String currElement = headToParse.next().toLowerCase();
+				
+				if(currElement.equals("obs") || currElement.equals("obsnum") || currElement.equals("oberservationnum") || 
+						currElement.equals("obsnumber") || currElement.contains("obs")) { //Find observation number, this should be updated with more criteria
+					obsIndex = index;
+				
+				}else if(currElement.equals("amtpaid") || currElement.equals("amntpaid") || (currElement.contains("am") 
+						&& currElement.contains("paid")) || (currElement.contains("am") && currElement.contains("pd"))) { //Find paid amount, this REALLY should be updated with more criteria
+					amntIndex = index;
+				}
+				
+				if(obsIndex != 999 && amntIndex != 999) { //Break if both indexes have been set
+					break;
+				}
+				index++;
 		}
+		if(obsIndex == 999 || amntIndex == 999) {
+			//ERROR, possible to make user specify where field, but will adress in later version
+		}
+		
 		//Then the rest of the file -- load into the data array
 		nLoaded = 0;
-		while (in.hasNext()) {
-			String inputLine = "";
-			String junk = "";
-			inputLine = in.nextLine();
+		
+		while (in.hasNext()) { //Iterate though each claim line
+			String inputLine = in.nextLine();
 			Scanner lineToParse = new Scanner(inputLine).useDelimiter(",");
-			int obsNum = lineToParse.nextInt();
-			//int obsNum = nLoaded + 1;
-			String claimID = lineToParse.next();
-			String lineNum = lineToParse.next();
+			int currIndex = 0;
+			boolean obsLoaded = false;
+			boolean amntLoaded = false;
+			while(lineToParse.hasNext()) {
+				if(currIndex == obsIndex) {
+					obsNum = lineToParse.nextInt();
+					obsLoaded = true;
+				}else if (currIndex == amntIndex) {
+					amntPaid = lineToParse.nextDouble();
+					amntLoaded = true;
+				}else {
+					lineToParse.next();
+				}
+				currIndex++;
+				if(amntLoaded && obsLoaded) {
+					break;
+				}
+			}
+			if(amntLoaded == false || amntLoaded == false) {
+				//error
+			}
 
-			junk = lineToParse.next();  //We don't use the date field
-//			junk = lineToParse.next();  //We don't use the time field
-			double amount = lineToParse.nextDouble();
-			if (amount >= 0) {  //Don't load negative claims --> THIS NEEDS TO BE BETTER ADDRESSED
-				DataItem newClaim = new DataItem(obsNum, claimID, lineNum, amount);
+
+			if (amntPaid >= 0) {  //Don't load negative claims --> THIS NEEDS TO BE BETTER ADDRESSED
+				DataItem newClaim = new DataItem(obsNum, amntPaid);
 				dataList.add(newClaim);
 				nLoaded++;				
 			}
 			lineToParse.close();
 		}
-		
+		}
 		in.close();		
 		return nLoaded;	
 	}
@@ -548,7 +420,6 @@ class SampleData {
 		nLoaded = 0;
 		while (in.hasNext()) {
 			String inputLine = "";
-			String junk = "";
 			inputLine = in.nextLine();
 			Scanner lineToParse = new Scanner(inputLine).useDelimiter(",");
 			int amount = lineToParse.nextInt();
@@ -574,7 +445,7 @@ public class SamplerMainClass {
 
 /**
  * Tool to generate and manage statistically valid, optimized stratified random samples of health care claims.
- * Based on the approach described in the paper "_____"
+ * Based on the approach described in the paper "ASSESSMENT OF AUDIT SAMPLING AND EXTRAPOLATION PROCESS" 
  *  
  * @param args
  * @throws FileNotFoundException
@@ -592,17 +463,19 @@ public class SamplerMainClass {
 	/*Boolean to check weather sampling is complete*/
 	public static boolean dataProcessed = false;
 	
-
+	public static int nTotalSamples = 200; //the total number of samples
+	
+	public static int minSamplesPerStratum = 16;  //min samples per stratum (if possible)
+	public static int nZeroDollarSamples = 5;  //total number of zero dollar claim samples
+	public static int nTopNSamples = 25;  //the number of Top N samples, which will be 100% audited
+	public static int nStratSamples = nTotalSamples - nZeroDollarSamples - nTopNSamples; //the number of samples in the stratified sample group
+	public static int nMajorStrata = 10; //Number of major strata
+	public static int nTrialStrata = 100;  //Number of trial strata to start with
+	
 	public static void main(String[] args) throws FileNotFoundException, SQLException, InterruptedException {
 		
 		/* Global input variables */
-		int nTotalSamples = 225;  //the total number of samples
-		int minSamplesPerStratum = 9;  //min samples per stratum (if possible)
-		int nZeroDollarSamples = 10;  //total number of zero dollar claim samples
-		int nTopNSamples = 25;  //the number of Top N samples, which will be 100% audited
-		int nStratSamples = nTotalSamples - nZeroDollarSamples - nTopNSamples; //the number of samples in the stratified sample group
-		int nMajorStrata = 20; //Number of major strata
-		int nTrialStrata = 100;  //Number of trial strata to start with
+
 
 		
 		/* Global data structures */
@@ -612,16 +485,8 @@ public class SamplerMainClass {
 					// lowerBound (inclusive), stratumSampleSize, stratumTotalAmount, stratumNumClaims, 
 		ArrayList<Stratum> majorStrata = new ArrayList<>();  // holds the final Major Strata
 		sampleClaims = new ArrayList<>();  //holds the claims sample that is drawn
-		SamplerGUI2 currWindow = new SamplerGUI2();
-//		
-		/* Database connection */
-//		Connection conn = null;
-//				
-//		/* Open Sampler database connection */
-//		conn = SampleData.setUpDBConnection(dbName);
-//		
-//		int junk = SampleData.makeNewDB(conn);
-//		System.out.println("Done");
+		SamplerGUI2 currWindow = new SamplerGUI2(); //GUI window to make references to inside main
+
 
 		/* Invoke the UI home page */
 		EventQueue.invokeLater(new Runnable() {
@@ -635,114 +500,160 @@ public class SamplerMainClass {
 		});
 
 		
-		
-		while(currWindow.getDataFile() == null) {
+		while(currWindow.getDataFile() == null) { //Stops thread until a valid data file is processed
 			try {
 				Thread.sleep(1500);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 		}
-		String dataFileName = currWindow.getDataFile().getAbsolutePath();
 		
-		String dbName = "SamplerDB";  // name of the internal Sampler DB
-		int nClaimsInDataFile = 0;
+		String dataFileName = currWindow.getDataFile().getAbsolutePath();
+
+		int nClaimsInDataFile = 0; //Number of claims in entire file (Total Population)
 				
 		/* Read in summary claims data */
-		while(currWindow.comboBox.getSelectedItem() == null || currWindow.comboBox.getSelectedItem().equals("Select Type")) {
-			System.out.println("Waiting" + currWindow.comboBox.getSelectedItem());
+		while(currWindow.comboBox.getSelectedItem() == null || currWindow.comboBox.getSelectedItem().equals("Select Type")) { //Waits until use selects Data option
 			try {
 				Thread.sleep(500);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		if(currWindow.comboBox.getSelectedItem().equals("Standard (Obs Num, Claim Id, etc..)")) {
-			nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
-		}else if (currWindow.comboBox.getSelectedItem().equals("From Sas (Amount and Freq")){
-			nClaimsInDataFile = SampleData.loadClaimsDataFromSas(claimsData,dataFileName);
-		}else {
-			System.out.println("FAILURE");
+		
+		try {
+			if(currWindow.comboBox.getSelectedItem().equals("Standard (Obs Num, Claim Id, etc..)")) { //User selected standard output
+				nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
+				
+			}else if (currWindow.comboBox.getSelectedItem().equals("From Sas (Amount and Freq")){ //User selected SAS output
+				nClaimsInDataFile = SampleData.loadClaimsDataFromSas(claimsData,dataFileName);
+			}else { //Error fetching user's selection
+				System.out.println("FAILURE");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		portClaimsData = claimsData;
+		portClaimsData = claimsData; //update global claimsData arraylist so it can be used outside this class
 
+		int trials = 0; //Integer for keeping track of the number of trials per min stratum size
+		boolean noSampleFound = false; //boolean to check if sampling was successful
 		
-		double perdif;
+		double perdif; //declare percentage difference variable so it may be updated and used for loop below
 		do {
+			if(trials > 100 && minSamplesPerStratum > 6) { //Updates min strata size if no valid samples are found within 200 samples
+				minSamplesPerStratum--;
+				trials = 0;
+			}
+			if(trials > 100 && minSamplesPerStratum < 10) {
+				minSamplesPerStratum++;
+				trials = 0;
+			}
+			
+			if(trials > 150) {
+				noSampleFound = true;
+				break;
+			}
+			
+			
 			double tmptotal = 0;
-			for (int i = 0; i < nClaimsInDataFile; i++) {
+			for (int i = 0; i < nClaimsInDataFile; i++) {  //get total amount of payments from entire population of claims
 				tmptotal = tmptotal + claimsData.get(i).getAmount();
 			}
 			System.out.format("Total claims amount: %f", tmptotal);
 			System.out.println("");
 			Collections.sort(claimsData);
-			System.out.println("Sort done.  Here are the first 10 records...");
 			System.out.format("Total claims amount: %f", tmptotal);
 			System.out.println("");
 			//		for (int i=0; i<10; i++) {
 			//			System.out.println(claimsData.get(i).getObsNum()+", "+claimsData.get(i).getClaimID()+", "+claimsData.get(i).getLineNum()+", "+claimsData.get(i).getAmount());			
 			//		}
+			
 			/* Determine the strata */
 			CreateSample.defineStrata(claimsData, trialStrata, majorStrata, nTrialStrata, nZeroDollarSamples,
 					nTopNSamples, nTotalSamples, nMajorStrata, minSamplesPerStratum);
+			
 			/* Draw and test the sample */
 			CreateSample.drawSample(claimsData, sampleClaims, majorStrata, nZeroDollarSamples, nTopNSamples,
 					nStratSamples, nTotalSamples, nMajorStrata);
 			
 			
-			finStrata = majorStrata;
-			dataProcessed = true;
+			finStrata = majorStrata; //update final strata list to use outside class
+			
+			/*
+			 * Code below generates statistics on current sample and prints both to console and GUI draw panel
+			 */
+			System.out.println("=========================================");
 			double x = getPopMean(claimsData);
 			currWindow.lblMeanClaimAmnt.setText(String.valueOf(x));
 			System.out.println("Pop mean: " + x);
+			
 			double y = getWeightedSampleMean(sampleClaims, finStrata);
 			currWindow.WeightedSampleMeanVal.setText(String.valueOf(y));
 			System.out.println("Weighted sample mean: " + y);
+			
 			double abDiff = getAbsDiff(x, y);
 			currWindow.AbsoluteDiffVal.setText(String.valueOf(abDiff));
 			System.out.println("Absolute Difference: " + abDiff);
+			
 			perdif = getPerDiff(getAbsDiff(x, y), x);
 			currWindow.PercentageDiffVal.setText(String.valueOf(perdif) + "%");
 			System.out.println("Percentage difference: " + getPerDiff(getAbsDiff(x, y), x) + "%");
-			if((perdif < 1.0) == false) {
+			
+			System.out.println("=========================================");
+			if((perdif < 1.0) == false) { //Clear out arrayLists so Algorithm can run again
 				trialStrata.clear();
 				majorStrata.clear();
 				sampleClaims.clear();
 			}
-			/*  Clean up  */
-			//		conn.close();
-		} while (perdif > 1.0);
+			
+			trials++;
+		} while (perdif > 1.0); //Make sure to update if statement above if this precision is changed from .5
+		System.out.println(trials + " Trials");
 		
+		if(noSampleFound) {
+			//display error message
+			System.out.println("fail");
+		}
+		
+		dataProcessed = true; //Update boolean to show sampling algorithm had finished processing
+		
+		/*
+		 * Show values of stats in GUI since algorithm is finished
+		 */
 		currWindow.lblMeanClaimAmnt.setVisible(true);
 		currWindow.WeightedSampleMeanVal.setVisible(true);
 		currWindow.AbsoluteDiffVal.setVisible(true);
 		currWindow.PercentageDiffVal.setVisible(true);
 		
 	}
+	
+	
 	public static ArrayList<Stratum> getMajorStrata() {
 		return finStrata;
 	}
 	
-	public static double getPopMean(ArrayList<DataItem> claimData) {
+	public static double getPopMean(ArrayList<DataItem> claimData) { //Returns mean of entire population from the claims data
+		
 		double total = 0;
 		double size = 0; 
-		for (int i = 0; i < claimData.size(); i++) {
-			//if((claimData.get(i).amount < claimData.get(finStrata.get(21).firstClaimPos).amount)) {
-				total += claimData.get(i).amount;
-				size++;
-			}
-		//}
+		for (int i = 0; claimData.get(i).stratumNum < finStrata.size() - 1; i++) {
+			total += claimData.get(i).amount; //update numerator
+			size++; //update denominator
+		}
+		
 		return roundToTwo(total / size);
 	}
 	
+	/* Calculates the weight sample mean by summing the product of each strata mean with its respective weight, where each weight is the proportion 
+	 * of the sample to the entire sample size, ommiting the top 21, usually using 200
+	 */
 	public static double getWeightedSampleMean(ArrayList<DataItem> sampleCLaims, ArrayList<Stratum> finStrata) {
 		double result = 0;
 		double divisor = 0;
-		double totWeight = 0;
-		for(int i = 0; i < finStrata.size() - 1; i++) {
+		for(int i = 0; i < finStrata.size() - 1; i++) { //Use strata 0 to 20, omit 21 because it skews the weighted mean
 			int currStratSize = 0;
 			double currStratAmnt = 0;
 			for(int j = 0; j < sampleCLaims.size(); j++) {
@@ -753,30 +664,34 @@ public class SamplerMainClass {
 				}
 			}
 			double currMean = currStratAmnt / currStratSize;
-			//System.out.println("CURR MEAN " + currMean + " CURR STRAT SIZE " + currStratSize);
-			double weight = currStratSize / 200.0;
-			totWeight += weight;
-			//System.out.println("WEIGHT: " + weight);
+			double weight = currStratSize / (float)(nTotalSamples - 25);
 			result += (currMean * weight);
 			divisor++;
-			//System.out.println(result);
 		}
-		return roundToTwo((result / (divisor)));
+		return roundToTwo(result / divisor);
 	}
-	
+	/*
+	 * Returns absolute difference of pop mean and weighted sample mean
+	 */
 	public static double getAbsDiff(double x, double y) {
 		return roundToTwo(Math.abs(x-y));
 	}
 	
+	/*
+	 * Returns percentage difference of pop mean and weighted sample mean  
+	 */
 	public static double getPerDiff(double diff, double popMean) {
 		return roundToTwo((Math.abs(diff / popMean) * 100));
 	}
 	
+	/*
+	 * Rounds double to 2 digits for presentation purposes
+	 */
 	public static double roundToTwo(double num) {
 		double x = num * 1000;
 		return (Math.round(x) / 1000.0);
 	}
 	
 	
+	}
 
-}

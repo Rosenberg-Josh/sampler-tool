@@ -6,33 +6,28 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+
 public class CSVWriter {
 	private static final String COMMA_DELIMITER = ",";
 	
 	private static final String NEW_LINE_SEPARATOR = "\n";
         
-	private static final String FILE_HEADER = "ObservationNumber,Claim_Number,Line_Number,Amount,Stratum_Number";
-	private static final String FILE_HEADER2 = "Stratum_Number,Lower,Upper,Size,Amount,Sample_Size,First_Claim_Position,Last_Claim_Position";
+	private static final String SAMPLE_HEADER = "ObservationNumber,Stratum_Number"; //Header for sample output with standard input
+	private static final String STAT_HEADER = "Stratum_Number,Lower_Bound,Upper_Bound,Size,Amount,Sample_Size,First_Claim_Position,Last_Claim_Position"; //Header for strata info and stats
 
-	public static void writeSampleFile(String fileName, ArrayList<DataItem> data) {
+	public static File writeSampleFile(String fileName, ArrayList<DataItem> data) { //Writes sample data to file and returns file
 		FileWriter fileWriter = null;
-		File desktop = new File(System.getProperty("user.home") + "/Desktop", fileName);
+		File desktop = new File(fileName);
 		try {
 			fileWriter = new FileWriter(desktop);
 			
 			//CSV header
-			fileWriter.append(FILE_HEADER.toString());
+			fileWriter.append(SAMPLE_HEADER.toString());
 			
 			fileWriter.append(NEW_LINE_SEPARATOR);
 			
 			for(int i = 0; i < data.size(); i++) {
 				fileWriter.append(String.valueOf(data.get(i).obsNum));
-				fileWriter.append(COMMA_DELIMITER);
-				fileWriter.append(data.get(i).claimID);
-                fileWriter.append(COMMA_DELIMITER);
-				fileWriter.append(data.get(i).lineNum);
-				fileWriter.append(COMMA_DELIMITER);
-				fileWriter.append(String.valueOf(data.get(i).amount));
 				fileWriter.append(COMMA_DELIMITER);
 				fileWriter.append(String.valueOf(data.get(i).stratumNum));
 				fileWriter.append(NEW_LINE_SEPARATOR);
@@ -41,27 +36,27 @@ public class CSVWriter {
 			e.printStackTrace();
 		}finally {
 			try {
-				
 				fileWriter.flush();
 				fileWriter.close();
 			}catch(IOException e) {
 				e.printStackTrace();
 			}
 		}
+		return desktop;
 	}
 	
-	public static void writeStatFile(String fileName, ArrayList<Stratum> strata) {
+	public static File writeStatFile(String fileName, ArrayList<Stratum> strata) {
 		FileWriter fileWriter = null;
-		File desktop = new File(System.getProperty("user.home") + "/Desktop", fileName);
+		File desktop = new File(fileName);
 		try {
 			fileWriter = new FileWriter(desktop);
 			
 			//CSV header
-			fileWriter.append(FILE_HEADER2.toString());
+			fileWriter.append(STAT_HEADER.toString());
 			
 			fileWriter.append(NEW_LINE_SEPARATOR);
 			System.out.println(strata);
-			for(int i = 1; i < 21; i++) {
+			for(int i = 0; i < 22; i++) {
 				fileWriter.append(String.valueOf(i));
 				fileWriter.append(COMMA_DELIMITER);
 				fileWriter.append(String.valueOf(strata.get(i).getLowerBound()));
@@ -79,6 +74,29 @@ public class CSVWriter {
 				fileWriter.append(String.valueOf(strata.get(i).getLastClaimPos()));
 				fileWriter.append(NEW_LINE_SEPARATOR);
 			}
+			fileWriter.append(NEW_LINE_SEPARATOR);
+			fileWriter.append(NEW_LINE_SEPARATOR);
+			fileWriter.append(NEW_LINE_SEPARATOR);
+			fileWriter.append("Population Mean");
+			fileWriter.append(COMMA_DELIMITER);
+			double x = SamplerMainClass.getPopMean(SamplerMainClass.portClaimsData);
+			fileWriter.append(String.valueOf(x));
+			fileWriter.append(NEW_LINE_SEPARATOR);
+			fileWriter.append("Weighted Sample Mean");
+			fileWriter.append(COMMA_DELIMITER);
+			double y = SamplerMainClass.getWeightedSampleMean(SamplerMainClass.sampleClaims, SamplerMainClass.finStrata);
+			fileWriter.append(String.valueOf(y));
+			fileWriter.append(NEW_LINE_SEPARATOR);
+			fileWriter.append("Absolute Difference");
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(SamplerMainClass.getAbsDiff(x, y)));
+			fileWriter.append(NEW_LINE_SEPARATOR);
+			fileWriter.append("Percentage Difference");
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(SamplerMainClass.getPerDiff(SamplerMainClass.getAbsDiff(x, y), x)));
+			fileWriter.append(NEW_LINE_SEPARATOR);
+				
+			
 		}catch (Exception e){
 			e.printStackTrace();
 		}finally {
@@ -90,16 +108,7 @@ public class CSVWriter {
 				e.printStackTrace();
 			}
 		}
+		return desktop;
 	}
-	
-	private boolean isWin() {
-		String os = System.getProperty("os.name").toLowerCase();
-		if(os.contains("win")) {
-			return true;
-		}else {
-			return false;
-		}
-	}
-
     
 }

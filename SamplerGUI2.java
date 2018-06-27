@@ -50,12 +50,11 @@ public class SamplerGUI2 {
 
 
 	public JFrame mainFrame;
-	private JTextField txtClientName;
-	private JTextField txtClientLocation;
-	private JTextField textField;
 	private JTextField filePath;
 	private final JFileChooser openFileChooser;
+	private final JFileChooser saveFileChooser;
 	public File dataFile;
+	public File statFile;
 	public boolean loadPanelShown = false;
 	public boolean dataLoadedCorrectly = false;
 	public boolean drawPanelShown = false;
@@ -96,6 +95,10 @@ public class SamplerGUI2 {
 		openFileChooser = new JFileChooser();
 		openFileChooser.setCurrentDirectory(new File("c:\\temp"));
 		openFileChooser.setFileFilter(new FileNameExtensionFilter("CSV file","csv"));
+		
+		saveFileChooser = new JFileChooser();
+		saveFileChooser.setCurrentDirectory(new File("c:\\temp"));
+		saveFileChooser.setFileFilter(new FileNameExtensionFilter("CSV file","csv"));
 
 	}
 
@@ -129,14 +132,19 @@ public class SamplerGUI2 {
 		SpringLayout sl_drawPanel = new SpringLayout();
 		drawPanel.setLayout(sl_drawPanel);
 		
-		JButton btnNext_1 = new JButton("Done");
-		sl_drawPanel.putConstraint(SpringLayout.SOUTH, btnNext_1, -10, SpringLayout.SOUTH, drawPanel);
-		sl_drawPanel.putConstraint(SpringLayout.EAST, btnNext_1, -10, SpringLayout.EAST, drawPanel);
-		drawPanel.add(btnNext_1);
+		JButton btnDone = new JButton("Done");
+		sl_drawPanel.putConstraint(SpringLayout.SOUTH, btnDone, -10, SpringLayout.SOUTH, drawPanel);
+		sl_drawPanel.putConstraint(SpringLayout.EAST, btnDone, -10, SpringLayout.EAST, drawPanel);
+		drawPanel.add(btnDone);
+		btnDone.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				mainFrame.dispose();
+			}
+		});
 		
 		JButton btnBack = new JButton("Back");
-		sl_drawPanel.putConstraint(SpringLayout.SOUTH, btnBack, 0, SpringLayout.SOUTH, btnNext_1);
-		sl_drawPanel.putConstraint(SpringLayout.EAST, btnBack, -9, SpringLayout.WEST, btnNext_1);
+		sl_drawPanel.putConstraint(SpringLayout.SOUTH, btnBack, 0, SpringLayout.SOUTH, btnDone);
+		sl_drawPanel.putConstraint(SpringLayout.EAST, btnBack, -9, SpringLayout.WEST, btnDone);
 		drawPanel.add(btnBack);
 		
 		JButton btnCancel_1 = new JButton("Cancel");
@@ -146,7 +154,7 @@ public class SamplerGUI2 {
 			}
 		});
 		sl_drawPanel.putConstraint(SpringLayout.WEST, btnCancel_1, 10, SpringLayout.WEST, drawPanel);
-		sl_drawPanel.putConstraint(SpringLayout.SOUTH, btnCancel_1, 0, SpringLayout.SOUTH, btnNext_1);
+		sl_drawPanel.putConstraint(SpringLayout.SOUTH, btnCancel_1, 0, SpringLayout.SOUTH, btnDone);
 		drawPanel.add(btnCancel_1);
 		
 		JLabel lblSampleInfo = new JLabel("Sample Info:");
@@ -165,35 +173,43 @@ public class SamplerGUI2 {
 		drawPanel.add(MeanClaimAmount);
 		
 		
-		JLabel finishNotice = new JLabel("File should now appear on desktop. Press \"Done\" to close.");
-		sl_drawPanel.putConstraint(SpringLayout.NORTH, finishNotice, -53, SpringLayout.NORTH, btnBack);
-		sl_drawPanel.putConstraint(SpringLayout.WEST, finishNotice, -366, SpringLayout.EAST, btnBack);
-		sl_drawPanel.putConstraint(SpringLayout.SOUTH, finishNotice, -24, SpringLayout.NORTH, btnBack);
-		sl_drawPanel.putConstraint(SpringLayout.EAST, finishNotice, 0, SpringLayout.EAST, btnBack);
-		drawPanel.add(finishNotice);
-		finishNotice.setVisible(false);
-		
 		JButton btnExportTocsv = new JButton("Export to .csv");
 		btnExportTocsv.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				String desFileName = fileNameInput.getText();
-				if(desFileName.endsWith(".csv") == false){
-					desFileName += ".csv";
-				}
-				while(SamplerMainClass.dataProcessed == false) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
+				public void actionPerformed(ActionEvent e) {
+					//Handle open button action.
+					String desFileName = fileNameInput.getText();
+					if(desFileName.endsWith(".csv") == false){
+						desFileName += ".csv";
 					}
+					while(SamplerMainClass.dataProcessed == false) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+					}
+					
+					if (e.getSource() == btnExportTocsv) {
+						dataFile = CSVWriter.writeSampleFile(desFileName, SamplerMainClass.sampleClaims);
+						statFile = CSVWriter.writeStatFile("TEMP", SamplerMainClass.finStrata);
+						saveFileChooser.setSelectedFile(dataFile);
+
+						int returnVal = saveFileChooser.showSaveDialog(drawPanel);
+						File chosenDir = saveFileChooser.getCurrentDirectory(); //Directory which user chose to output sample
+						
+
+				        if (returnVal == JFileChooser.APPROVE_OPTION) {
+				        	dataFile.renameTo(new File(chosenDir + "\\" + "AUDIT_SAMPLE_FOR_" + dataFile.toString())); //Move file to chosen directory
+				        	statFile.renameTo(new File(chosenDir + "\\" + "AUDIT_STATS_FOR_" + dataFile.toString())); //Move file to chosen directory
+				            filePath.setText(dataFile.getPath());
+				            if(dataFile.getName().endsWith(".csv")) {
+				            		dataLoadedCorrectly = true;
+				            }
+				        }
+				   } 
 				}
-				
-				CSVWriter.writeSampleFile(desFileName, SamplerMainClass.sampleClaims);
-				CSVWriter.writeStatFile("stats.csv", SamplerMainClass.getMajorStrata());
-				finishNotice.setVisible(true);
-			}
-		});
+			});
+
 		sl_drawPanel.putConstraint(SpringLayout.NORTH, btnExportTocsv, 132, SpringLayout.NORTH, drawPanel);
 		sl_drawPanel.putConstraint(SpringLayout.WEST, btnExportTocsv, 0, SpringLayout.WEST, btnBack);
 		drawPanel.add(btnExportTocsv);
@@ -209,7 +225,7 @@ public class SamplerGUI2 {
 		drawPanel.add(fileNameInput);
 		fileNameInput.setColumns(10);
 		
-		JLabel lblEnteredNameOf = new JLabel("Enter name of file:");
+		JLabel lblEnteredNameOf = new JLabel("Enter name of Entity:");
 		sl_drawPanel.putConstraint(SpringLayout.EAST, lblNewLabel, -137, SpringLayout.WEST, lblEnteredNameOf);
 		sl_drawPanel.putConstraint(SpringLayout.NORTH, fileNameInput, 6, SpringLayout.SOUTH, lblEnteredNameOf);
 		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblEnteredNameOf, 0, SpringLayout.NORTH, lblSampleSize);
@@ -252,8 +268,8 @@ public class SamplerGUI2 {
 		PercentageDiffVal = new JLabel();
 		sl_drawPanel.putConstraint(SpringLayout.NORTH, PercentageDiffVal, 0, SpringLayout.NORTH, lblPercentageDifference);
 		sl_drawPanel.putConstraint(SpringLayout.WEST, PercentageDiffVal, 0, SpringLayout.EAST, lblMeanClaimAmnt);
-		sl_drawPanel.putConstraint(SpringLayout.SOUTH, PercentageDiffVal, 0, SpringLayout.NORTH, lblPercentageDifference);
-		sl_drawPanel.putConstraint(SpringLayout.EAST, PercentageDiffVal, 0, SpringLayout.EAST, lblMeanClaimAmnt);
+		//sl_drawPanel.putConstraint(SpringLayout.SOUTH, PercentageDiffVal, 0, SpringLayout.NORTH, lblPercentageDifference);
+		//sl_drawPanel.putConstraint(SpringLayout.EAST, PercentageDiffVal, 0, SpringLayout.EAST, lblMeanClaimAmnt);
 		drawPanel.add(PercentageDiffVal);
 		PercentageDiffVal.setVisible(false);
 		
