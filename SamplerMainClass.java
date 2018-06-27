@@ -514,13 +514,25 @@ public class SamplerMainClass {
 		int nClaimsInDataFile = 0; //Number of claims in entire file (Total Population)
 				
 		/* Read in summary claims data */
-		while(currWindow.comboBox.getSelectedItem() == null || currWindow.comboBox.getSelectedItem().equals("Select Type")) { //Waits until use selects Data option
+		while((currWindow.comboBox.getSelectedItem() == null || currWindow.comboBox.getSelectedItem().equals("Select Type"))) { //Waits until use selects Data option
 			try {
 				Thread.sleep(500);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		while(currWindow.nextButtonPressed == false) {
+			try {
+				Thread.sleep(500);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		nTotalSamples = Integer.parseInt(currWindow.getSampleSizeField().getText());
+		nTopNSamples = Integer.parseInt(currWindow.getTopClaimsField().getText());
+		nZeroDollarSamples = Integer.parseInt(currWindow.getZeroDollarClaimsField().getText());
+		nMajorStrata = Integer.parseInt(currWindow.getNumberOfStrataField().getText());
 		
 		try {
 			if(currWindow.comboBox.getSelectedItem().equals("Standard (Obs Num, Claim Id, etc..)")) { //User selected standard output
