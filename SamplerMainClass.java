@@ -463,13 +463,13 @@ public class SamplerMainClass {
 	/*Boolean to check weather sampling is complete*/
 	public static boolean dataProcessed = false;
 	
-	public static int nTotalSamples = 200; //the total number of samples
+	public static int nTotalSamples = 225; //the total number of samples
 	
-	public static int minSamplesPerStratum = 16;  //min samples per stratum (if possible)
+	public static int minSamplesPerStratum = 9;  //min samples per stratum (if possible)
 	public static int nZeroDollarSamples = 5;  //total number of zero dollar claim samples
 	public static int nTopNSamples = 25;  //the number of Top N samples, which will be 100% audited
 	public static int nStratSamples = nTotalSamples - nZeroDollarSamples - nTopNSamples; //the number of samples in the stratified sample group
-	public static int nMajorStrata = 10; //Number of major strata
+	public static int nMajorStrata = 20; //Number of major strata
 	public static int nTrialStrata = 100;  //Number of trial strata to start with
 	
 	public static void main(String[] args) throws FileNotFoundException, SQLException, InterruptedException {
@@ -534,6 +534,12 @@ public class SamplerMainClass {
 		nZeroDollarSamples = Integer.parseInt(currWindow.getZeroDollarClaimsField().getText());
 		nMajorStrata = Integer.parseInt(currWindow.getNumberOfStrataField().getText());
 		
+		if(nMajorStrata <= 15 && nMajorStrata > 8) {
+			minSamplesPerStratum = 15;
+		}else if(nMajorStrata > 15) {
+			minSamplesPerStratum = 9;
+		}
+		
 		try {
 			if(currWindow.comboBox.getSelectedItem().equals("Standard (Obs Num, Claim Id, etc..)")) { //User selected standard output
 				nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
@@ -544,7 +550,6 @@ public class SamplerMainClass {
 				System.out.println("FAILURE");
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -554,21 +559,37 @@ public class SamplerMainClass {
 		boolean noSampleFound = false; //boolean to check if sampling was successful
 		
 		double perdif; //declare percentage difference variable so it may be updated and used for loop below
+		
 		do {
-			if(trials > 100 && minSamplesPerStratum > 6) { //Updates min strata size if no valid samples are found within 200 samples
-				minSamplesPerStratum--;
-				trials = 0;
+			if(nMajorStrata > 15) {
+				if(trials > 100 && minSamplesPerStratum > 6) { //Updates min strata size if no valid samples are found within 200 samples
+					minSamplesPerStratum--;
+					trials = 0;
+				}
+				if(trials > 100 && minSamplesPerStratum <= 10) {
+					minSamplesPerStratum++;
+					trials = 0;
+				}
+				
+				if(trials > 150) {
+					noSampleFound = true;
+					break;
+				}
+			}else if(nMajorStrata <= 15 && nMajorStrata > 8) {
+				if(trials > 100 && minSamplesPerStratum > 8) { //Updates min strata size if no valid samples are found within 200 samples
+					minSamplesPerStratum--;
+					trials = 0;
+				}
+				if(trials > 100 && minSamplesPerStratum <= 17) {
+					minSamplesPerStratum++;
+					trials = 0;
+				}
+				
+				if(trials > 150) {
+					noSampleFound = true;
+					break;
+				}
 			}
-			if(trials > 100 && minSamplesPerStratum < 10) {
-				minSamplesPerStratum++;
-				trials = 0;
-			}
-			
-			if(trials > 150) {
-				noSampleFound = true;
-				break;
-			}
-			
 			
 			double tmptotal = 0;
 			for (int i = 0; i < nClaimsInDataFile; i++) {  //get total amount of payments from entire population of claims
@@ -602,7 +623,12 @@ public class SamplerMainClass {
 			currWindow.lblMeanClaimAmnt.setText(String.valueOf(x));
 			System.out.println("Pop mean: " + x);
 			
-			double y = getWeightedSampleMean(sampleClaims, finStrata);
+			double y;
+			if(nClaimsInDataFile > 20000) {
+				y = getWeightedSampleMean(sampleClaims, finStrata);
+			}else {
+				y = getWeightedSampleMeanSmall(sampleClaims, finStrata);
+			}
 			currWindow.WeightedSampleMeanVal.setText(String.valueOf(y));
 			System.out.println("Weighted sample mean: " + y);
 			
@@ -662,6 +688,7 @@ public class SamplerMainClass {
 	/* Calculates the weight sample mean by summing the product of each strata mean with its respective weight, where each weight is the proportion 
 	 * of the sample to the entire sample size, ommiting the top 21, usually using 200
 	 */
+	
 	public static double getWeightedSampleMean(ArrayList<DataItem> sampleCLaims, ArrayList<Stratum> finStrata) {
 		double result = 0;
 		double divisor = 0;
@@ -676,12 +703,35 @@ public class SamplerMainClass {
 				}
 			}
 			double currMean = currStratAmnt / currStratSize;
-			double weight = currStratSize / (float)(nTotalSamples - 25);
+			double weight = currStratSize / (float)(nTotalSamples);
 			result += (currMean * weight);
 			divisor++;
 		}
 		return roundToTwo(result / divisor);
 	}
+	/*
+	 * Calculates weighted sample mean for small samples
+	 */
+	public static double getWeightedSampleMeanSmall(ArrayList<DataItem> sampleCLaims, ArrayList<Stratum> finStrata) {
+		double result = 0;
+		double divisor = sampleClaims.size();
+		for(int i = 0; i < finStrata.size() - 1; i++) { //Use strata 0 to 20, omit 21 because it skews the weighted mean
+			int currStratSize = 0;
+			double currStratAmnt = 0;
+			for(int j = 0; j < sampleCLaims.size(); j++) {
+				if (sampleClaims.get(j).stratumNum == i) {
+					currStratSize++;
+					currStratAmnt += sampleClaims.get(j).amount;
+					
+				}
+			}
+			double currMean = currStratAmnt / currStratSize;
+
+			result += (currMean);
+		}
+		return roundToTwo(result / divisor);
+	}
+	
 	/*
 	 * Returns absolute difference of pop mean and weighted sample mean
 	 */

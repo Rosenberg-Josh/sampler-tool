@@ -28,6 +28,8 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.FileChooserUI;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+
 import java.awt.SystemColor;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -71,9 +73,17 @@ public class SamplerGUI2 {
 	private JTextField topClaimsField;
 	private JTextField zeroDollarClaimsField;
 	public boolean nextButtonPressed = false;
-	
+	public File clientDirectory;
 
 	
+	public File getClientDirectory() {
+		return clientDirectory;
+	}
+
+	public void setClientDirectory(File clientDirectory) {
+		this.clientDirectory = clientDirectory;
+	}
+
 	public String getDataFormat() {
 		return dataFormat;
 	}
@@ -201,11 +211,12 @@ public class SamplerGUI2 {
 
 						int returnVal = saveFileChooser.showSaveDialog(drawPanel);
 						File chosenDir = saveFileChooser.getCurrentDirectory(); //Directory which user chose to output sample
-						
+						clientDirectory = chosenDir;
 
 				        if (returnVal == JFileChooser.APPROVE_OPTION) {
 				        	dataFile.renameTo(new File(chosenDir + "\\" + "AUDIT_SAMPLE_FOR_" + dataFile.toString())); //Move file to chosen directory
 				        	statFile.renameTo(new File(chosenDir + "\\" + "AUDIT_STATS_FOR_" + dataFile.toString())); //Move file to chosen directory
+				        	ExcelWriter.writeToTemplate(chosenDir, SamplerMainClass.sampleClaims, SamplerMainClass.finStrata);
 				            filePath.setText(dataFile.getPath());
 				            if(dataFile.getName().endsWith(".csv")) {
 				            		dataLoadedCorrectly = true;
