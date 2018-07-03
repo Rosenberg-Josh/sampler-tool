@@ -513,14 +513,7 @@ public class SamplerMainClass {
 
 		int nClaimsInDataFile = 0; //Number of claims in entire file (Total Population)
 				
-		/* Read in summary claims data */
-		while((currWindow.comboBox.getSelectedItem() == null || currWindow.comboBox.getSelectedItem().equals("Select Type"))) { //Waits until use selects Data option
-			try {
-				Thread.sleep(500);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+
 		while(currWindow.nextButtonPressed == false) {
 			try {
 				Thread.sleep(500);
@@ -540,18 +533,6 @@ public class SamplerMainClass {
 			minSamplesPerStratum = 9;
 		}
 		
-		try {
-			if(currWindow.comboBox.getSelectedItem().equals("Standard (Obs Num, Claim Id, etc..)")) { //User selected standard output
-				nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
-				
-			}else if (currWindow.comboBox.getSelectedItem().equals("From Sas (Amount and Freq")){ //User selected SAS output
-				nClaimsInDataFile = SampleData.loadClaimsDataFromSas(claimsData,dataFileName);
-			}else { //Error fetching user's selection
-				System.out.println("FAILURE");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		
 		portClaimsData = claimsData; //update global claimsData arraylist so it can be used outside this class
 
