@@ -471,6 +471,7 @@ public class SamplerMainClass {
 	public static int nStratSamples = nTotalSamples - nZeroDollarSamples - nTopNSamples; //the number of samples in the stratified sample group
 	public static int nMajorStrata = 20; //Number of major strata
 	public static int nTrialStrata = 100;  //Number of trial strata to start with
+	public static double confLevel = 99.0;
 	
 	public static void main(String[] args) throws FileNotFoundException, SQLException, InterruptedException {
 		
@@ -526,6 +527,7 @@ public class SamplerMainClass {
 		nTopNSamples = Integer.parseInt(currWindow.getTopClaimsField().getText());
 		nZeroDollarSamples = Integer.parseInt(currWindow.getZeroDollarClaimsField().getText());
 		nMajorStrata = Integer.parseInt(currWindow.getNumberOfStrataField().getText());
+		confLevel = Double.parseDouble(currWindow.getConfidence_LevelField().getText());
 		
 		if(nMajorStrata <= 15 && nMajorStrata > 8) {
 			minSamplesPerStratum = 15;
@@ -533,6 +535,7 @@ public class SamplerMainClass {
 			minSamplesPerStratum = 9;
 		}
 		
+		nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
 		
 		portClaimsData = claimsData; //update global claimsData arraylist so it can be used outside this class
 
@@ -541,7 +544,11 @@ public class SamplerMainClass {
 		
 		double perdif; //declare percentage difference variable so it may be updated and used for loop below
 		
+		double precision = (100 - confLevel);
+		
 		do {
+			
+			
 			if(nMajorStrata > 15) {
 				if(trials > 100 && minSamplesPerStratum > 6) { //Updates min strata size if no valid samples are found within 200 samples
 					minSamplesPerStratum--;
@@ -622,14 +629,14 @@ public class SamplerMainClass {
 			System.out.println("Percentage difference: " + getPerDiff(getAbsDiff(x, y), x) + "%");
 			
 			System.out.println("=========================================");
-			if((perdif < 1.0) == false) { //Clear out arrayLists so Algorithm can run again
+			if((perdif < precision) == false) { //Clear out arrayLists so Algorithm can run again
 				trialStrata.clear();
 				majorStrata.clear();
 				sampleClaims.clear();
 			}
 			
 			trials++;
-		} while (perdif > 1.0); //Make sure to update if statement above if this precision is changed from .5
+		} while (perdif > precision); //Make sure to update if statement above if this precision is changed from .5
 		System.out.println(trials + " Trials");
 		
 		if(noSampleFound) {

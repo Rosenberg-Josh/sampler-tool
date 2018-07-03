@@ -138,14 +138,14 @@ public class SamplerGUI2 {
 		
 		JPanel loadPanel = new JPanel();
 		loadPanel.setBackground(Color.LIGHT_GRAY);
-		//mainFrame.getContentPane().add(loadPanel);
+		mainFrame.getContentPane().add(loadPanel);
 		SpringLayout sl_loadPanel = new SpringLayout();
 		loadPanel.setLayout(sl_loadPanel);
 		
 
 		JPanel drawPanel = new JPanel();
 		drawPanel.setBackground(Color.LIGHT_GRAY);
-		mainFrame.getContentPane().add(drawPanel);
+		//mainFrame.getContentPane().add(drawPanel);
 		SpringLayout sl_drawPanel = new SpringLayout();
 		drawPanel.setLayout(sl_drawPanel);
 		
@@ -419,16 +419,26 @@ public class SamplerGUI2 {
 		sl_loadPanel.putConstraint(SpringLayout.SOUTH, Confidence_LevelField, 0, SpringLayout.SOUTH, lblConfidenceLevel);
 		sl_loadPanel.putConstraint(SpringLayout.EAST, Confidence_LevelField, 0, SpringLayout.EAST, sampleSizeField);
 		loadPanel.add(Confidence_LevelField);
+		Confidence_LevelField.setText(String.valueOf(SamplerMainClass.confLevel));
 		Confidence_LevelField.setColumns(10);
 		
 		JLabel gLogoLoad = new JLabel("");
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, gLogoLoad, 17, SpringLayout.SOUTH, lblConfidenceLevel);
 		sl_loadPanel.putConstraint(SpringLayout.EAST, gLogoLoad, 0, SpringLayout.EAST, sampleSizeField);
 		File image2 = new File("gallagher_wtag_stackedlarge-3d-1.png");
+		System.out.println(image2.exists());
 		gLogoLoad.setIcon(new ImageIcon(image2.getAbsolutePath()));
 		loadPanel.add(gLogoLoad);
 		
 		
+	}
+
+	public JTextField getConfidence_LevelField() {
+		return Confidence_LevelField;
+	}
+
+	public void setConfidence_LevelField(JTextField confidence_LevelField) {
+		Confidence_LevelField = confidence_LevelField;
 	}
 
 	public JTextField getSampleSizeField() {
