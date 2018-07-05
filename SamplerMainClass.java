@@ -17,6 +17,10 @@ import java.awt.event.ActionEvent;
 import java.awt.Font;
 import javax.swing.SwingConstants;
 
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 
 class Stratum implements Comparable<Stratum> {
 	/** Implements a single Stratum.  The stratum number is represented by its location in an ArrayList
@@ -321,84 +325,136 @@ class SampleData {
 		
 	}
 	
-	public static int loadClaimsData(ArrayList<DataItem> dataList, String dataFileName) throws FileNotFoundException {
+	public static int loadClaimsData(ArrayList<DataItem> dataList, String dataFileName) throws IOException {
 		
-		int nLoaded = -1;  //-1 = Error, nothing loaded; positive n = number of claims loaded
-		/* Open the data file */
-		File inputFile = new File(dataFileName);
-		Scanner in = new Scanner(inputFile);
-		System.out.println(in);
-		
-		/* Read in the data file */
-		if (in.hasNext()) { 
-			int obsIndex = 999; //Used to refrece observation number from data
-			int amntIndex = 999; //Used to reference amnt paid from data
-			int obsNum = -1;
-			double amntPaid = -1;
-			String headLine = "";
-			headLine = in.nextLine(); //Header Line
-			Scanner headToParse = new Scanner(headLine).useDelimiter(","); //split header into iterative scanner
-			int index = 0; //Starting Index
-			while(headToParse.hasNext()) { //Iterate though entire header
-				String currElement = headToParse.next().toLowerCase();
-				
-				if(currElement.equals("obs") || currElement.equals("obsnum") || currElement.equals("oberservationnum") || 
-						currElement.equals("obsnumber") || currElement.contains("obs")) { //Find observation number, this should be updated with more criteria
-					obsIndex = index;
-				
-				}else if(currElement.equals("amtpaid") || currElement.equals("amntpaid") || (currElement.contains("am") 
-						&& currElement.contains("paid")) || (currElement.contains("am") && currElement.contains("pd"))) { //Find paid amount, this REALLY should be updated with more criteria
-					amntIndex = index;
+		if(dataFileName.contains(".csv")) {
+			int nLoaded = -1;  //-1 = Error, nothing loaded; positive n = number of claims loaded
+			/* Open the data file */
+			File inputFile = new File(dataFileName);
+			Scanner in = new Scanner(inputFile);
+			
+			/* Read in the data file */
+			if (in.hasNext()) { 
+				int obsIndex = 999; //Used to refrece observation number from data
+				int amntIndex = 999; //Used to reference amnt paid from data
+				int obsNum = -1;
+				double amntPaid = -1;
+				String headLine = "";
+				headLine = in.nextLine(); //Header Line
+				Scanner headToParse = new Scanner(headLine).useDelimiter(","); //split header into iterative scanner
+				int index = 0; //Starting Index
+				while(headToParse.hasNext()) { //Iterate though entire header
+					String currElement = headToParse.next().toLowerCase();
+					
+					if(currElement.equals("obs") || currElement.equals("obsnum") || currElement.equals("oberservationnum") || 
+							currElement.equals("obsnumber") || currElement.contains("obs")) { //Find observation number, this should be updated with more criteria
+						obsIndex = index;
+					
+					}else if(currElement.equals("amtpaid") || currElement.equals("amntpaid") || (currElement.contains("am") 
+							&& currElement.contains("paid")) || (currElement.contains("am") && currElement.contains("pd"))  || (currElement.contains("am") && currElement.contains("pmt"))) { //Find paid amount, this REALLY should be updated with more criteria
+						amntIndex = index;
+					}
+					
+					if(obsIndex != 999 && amntIndex != 999) { //Break if both indexes have been set
+						break;
+					}
+					index++;
+			}
+			if(obsIndex == 999 || amntIndex == 999) {
+				//ERROR, possible to make user specify where field, but will adress in later version
+			}
+			
+			//Then the rest of the file -- load into the data array
+			nLoaded = 0;
+			
+			while (in.hasNext()) { //Iterate though each claim line
+				String inputLine = in.nextLine();
+				Scanner lineToParse = new Scanner(inputLine).useDelimiter(",");
+				int currIndex = 0;
+				boolean obsLoaded = false;
+				boolean amntLoaded = false;
+				while(lineToParse.hasNext()) {
+					if(currIndex == obsIndex) {
+						obsNum = lineToParse.nextInt();
+						obsLoaded = true;
+					}else if (currIndex == amntIndex) {
+						amntPaid = lineToParse.nextDouble();
+						amntLoaded = true;
+					}else {
+						lineToParse.next();
+					}
+					currIndex++;
+					if(amntLoaded && obsLoaded) {
+						break;
+					}
 				}
-				
-				if(obsIndex != 999 && amntIndex != 999) { //Break if both indexes have been set
-					break;
+				if(amntLoaded == false || amntLoaded == false) {
+					//error
 				}
-				index++;
-		}
-		if(obsIndex == 999 || amntIndex == 999) {
-			//ERROR, possible to make user specify where field, but will adress in later version
-		}
-		
-		//Then the rest of the file -- load into the data array
-		nLoaded = 0;
-		
-		while (in.hasNext()) { //Iterate though each claim line
-			String inputLine = in.nextLine();
-			Scanner lineToParse = new Scanner(inputLine).useDelimiter(",");
-			int currIndex = 0;
-			boolean obsLoaded = false;
-			boolean amntLoaded = false;
-			while(lineToParse.hasNext()) {
-				if(currIndex == obsIndex) {
-					obsNum = lineToParse.nextInt();
-					obsLoaded = true;
-				}else if (currIndex == amntIndex) {
-					amntPaid = lineToParse.nextDouble();
-					amntLoaded = true;
-				}else {
-					lineToParse.next();
+	
+	
+				if (amntPaid >= 0) {  //Don't load negative claims --> THIS NEEDS TO BE BETTER ADDRESSED
+					DataItem newClaim = new DataItem(obsNum, amntPaid);
+					dataList.add(newClaim);
+					nLoaded++;				
 				}
-				currIndex++;
-				if(amntLoaded && obsLoaded) {
-					break;
+				lineToParse.close();
+			}
+			}
+			in.close();		
+			return nLoaded;	
+			
+		}else if(dataFileName.contains(".xlsm") || dataFileName.contains(".xls") || dataFileName.contains(".xlsx") || dataFileName.contains(".xlst")) {
+			int nLoaded = -1;  //-1 = Error, nothing loaded; positive n = number of claims loaded
+			File file = new File(dataFileName);
+			FileInputStream xlsxFile = new FileInputStream(file);
+			XSSFWorkbook workbook = new XSSFWorkbook(xlsxFile);
+			XSSFSheet inputSheet = workbook.getSheetAt(0);
+			boolean headersLoaded = false;
+			int obsIndex = -1;
+			int amntIndex = -1;
+			int dataStartRow = -1;
+			for(int i = 0; headersLoaded == false; i++) {
+				XSSFRow row = inputSheet.getRow(i);
+				System.out.println(row.getCell(0).getStringCellValue());
+				for(int j = 0; row.getCell(j).getStringCellValue() != null; j++) {
+					String currElement =  row.getCell(j).getStringCellValue().toLowerCase();
+					System.out.println(currElement);
+					if(currElement.equals("obs") || currElement.equals("obsnum") || currElement.equals("oberservationnum") || 
+							currElement.equals("obsnumber") || currElement.contains("obs")) { //Find observation number, this should be updated with more criteria
+						obsIndex = j;
+					
+					}else if(currElement.equals("amtpaid") || currElement.equals("amntpaid") || (currElement.contains("am") 
+							&& currElement.contains("paid")) || (currElement.contains("am") && currElement.contains("pd"))  || (currElement.contains("am") && currElement.contains("pmt"))) { //Find paid amount, this REALLY should be updated with more criteria
+						amntIndex = j;
+					}
+					if(obsIndex != -1 && amntIndex != -1) {
+						headersLoaded = true;
+						dataStartRow = i + 1;
+						break;
+					}
 				}
 			}
-			if(amntLoaded == false || amntLoaded == false) {
-				//error
+			nLoaded = 0;
+			System.out.println(obsIndex);
+			System.out.println(amntIndex);
+			System.out.println(inputSheet.getLastRowNum());
+			for(int i = dataStartRow; i <= inputSheet.getLastRowNum(); i++) {
+				XSSFRow row = inputSheet.getRow(i);
+				int obsNum = (int)row.getCell(obsIndex).getNumericCellValue();
+				double amntPaid = row.getCell(amntIndex).getNumericCellValue();
+				if(amntPaid >= 0) {
+					DataItem newClaim = new DataItem(obsNum, amntPaid);
+					dataList.add(newClaim);
+					nLoaded++;
+				}
 			}
-
-
-			if (amntPaid >= 0) {  //Don't load negative claims --> THIS NEEDS TO BE BETTER ADDRESSED
-				DataItem newClaim = new DataItem(obsNum, amntPaid);
-				dataList.add(newClaim);
-				nLoaded++;				
-			}
-			lineToParse.close();
+			System.out.println(nLoaded);
+			return nLoaded;
+		}else {
+			System.out.println("File error");
+			return -1;
 		}
-		}
-		in.close();		
-		return nLoaded;	
 	}
 	
 	public static int loadClaimsDataFromSas(ArrayList<DataItem> dataList, String dataFileName) throws FileNotFoundException {
@@ -407,6 +463,7 @@ class SampleData {
 		
 		/* Open the data file */
 		File inputFile = new File(dataFileName);
+		
 		Scanner in = new Scanner(inputFile);
 		System.out.println(in);
 		
@@ -473,7 +530,7 @@ public class SamplerMainClass {
 	public static int nTrialStrata = 100;  //Number of trial strata to start with
 	public static double confLevel = 99.0;
 	
-	public static void main(String[] args) throws FileNotFoundException, SQLException, InterruptedException {
+	public static void main(String[] args) throws SQLException, InterruptedException, IOException {
 		
 		/* Global input variables */
 

@@ -112,6 +112,7 @@ public class SamplerGUI2 {
 		openFileChooser = new JFileChooser();
 		openFileChooser.setCurrentDirectory(new File("c:\\temp"));
 		openFileChooser.setFileFilter(new FileNameExtensionFilter("CSV file","csv"));
+		openFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel file", "xls", "xlsx"));
 		
 		saveFileChooser = new JFileChooser();
 		saveFileChooser.setCurrentDirectory(new File("c:\\temp"));
@@ -311,7 +312,7 @@ public class SamplerGUI2 {
 			            dataFile = openFileChooser.getSelectedFile();
 			            //This is where a real application would open the file.
 			            filePath.setText(dataFile.getPath());
-			            if(dataFile.getName().endsWith(".csv")) {
+			            if(dataFile.getName().endsWith(".csv") || dataFile.getName().contains(".xl")) {
 			            		dataLoadedCorrectly = true;
 			            }
 			        } else {
@@ -360,7 +361,6 @@ public class SamplerGUI2 {
 		});
 		loadPanel.add(btnCancel);
 		
-		String[] formatOptions = { "Select Type", "Standard (Obs Num, Claim Id, etc..)", "From Sas (Amount and Freq" };
 		
 		JLabel lblSampleSizel = new JLabel("Sample Size:");
 		loadPanel.add(lblSampleSizel);
