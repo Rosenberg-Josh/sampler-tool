@@ -529,6 +529,7 @@ public class SamplerMainClass {
 	public static int nMajorStrata = 20; //Number of major strata
 	public static int nTrialStrata = 100;  //Number of trial strata to start with
 	public static double confLevel = 99.0;
+	public static int nClaimsInDataFile;
 	
 	public static void main(String[] args) throws SQLException, InterruptedException, IOException {
 		
@@ -569,7 +570,7 @@ public class SamplerMainClass {
 		
 		String dataFileName = currWindow.getDataFile().getAbsolutePath();
 
-		int nClaimsInDataFile = 0; //Number of claims in entire file (Total Population)
+		nClaimsInDataFile = 0; //Number of claims in entire file (Total Population)
 				
 
 		while(currWindow.nextButtonPressed == false) {
@@ -664,16 +665,11 @@ public class SamplerMainClass {
 			 * Code below generates statistics on current sample and prints both to console and GUI draw panel
 			 */
 			System.out.println("=========================================");
-			double x = getPopMean(claimsData);
+			 double x = getPopMean(claimsData);
 			currWindow.lblMeanClaimAmnt.setText(String.valueOf(x));
 			System.out.println("Pop mean: " + x);
 			
-			double y;
-			if(nClaimsInDataFile > 20000) {
-				y = getWeightedSampleMean(sampleClaims, finStrata);
-			}else {
-				y = getWeightedSampleMeanSmall(sampleClaims, finStrata);
-			}
+			double y = getWeightedSampleMean(sampleClaims, finStrata);
 			currWindow.WeightedSampleMeanVal.setText(String.valueOf(y));
 			System.out.println("Weighted sample mean: " + y);
 			
@@ -684,7 +680,7 @@ public class SamplerMainClass {
 			perdif = getPerDiff(getAbsDiff(x, y), x);
 			currWindow.PercentageDiffVal.setText(String.valueOf(perdif) + "%");
 			System.out.println("Percentage difference: " + getPerDiff(getAbsDiff(x, y), x) + "%");
-			
+
 			System.out.println("=========================================");
 			if((perdif < precision) == false) { //Clear out arrayLists so Algorithm can run again
 				trialStrata.clear();
@@ -736,23 +732,14 @@ public class SamplerMainClass {
 	
 	public static double getWeightedSampleMean(ArrayList<DataItem> sampleCLaims, ArrayList<Stratum> finStrata) {
 		double result = 0;
-		double divisor = 0;
 		for(int i = 0; i < finStrata.size() - 1; i++) { //Use strata 0 to 20, omit 21 because it skews the weighted mean
-			int currStratSize = 0;
-			double currStratAmnt = 0;
-			for(int j = 0; j < sampleCLaims.size(); j++) {
-				if (sampleClaims.get(j).stratumNum == i) {
-					currStratSize++;
-					currStratAmnt += sampleClaims.get(j).amount;
-					
-				}
-			}
-			double currMean = currStratAmnt / currStratSize;
-			double weight = currStratSize / (float)(nTotalSamples);
-			result += (currMean * weight);
-			divisor++;
+			double currStratMean = finStrata.get(i).stratumMean;
+
+			double weight = finStrata.get(i).stratumNumClaims / (double)(nClaimsInDataFile);
+			result += (currStratMean * weight);
+			
 		}
-		return roundToTwo(result / divisor);
+		return roundToTwo(result);
 	}
 	/*
 	 * Calculates weighted sample mean for small samples
@@ -780,6 +767,7 @@ public class SamplerMainClass {
 	/*
 	 * Returns absolute difference of pop mean and weighted sample mean
 	 */
+	
 	public static double getAbsDiff(double x, double y) {
 		return roundToTwo(Math.abs(x-y));
 	}
@@ -798,7 +786,6 @@ public class SamplerMainClass {
 		double x = num * 1000;
 		return (Math.round(x) / 1000.0);
 	}
-	
-	
-	}
+
+}
 
