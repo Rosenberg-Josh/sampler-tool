@@ -1,21 +1,13 @@
 package SamplerPackage;
-import java.util.Scanner;
-import SamplerPackage.SamplerGUI2;
+import java.awt.EventQueue;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.io.*;
-import java.lang.Math;
-import java.sql.*;
-
-import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.Font;
-import javax.swing.SwingConstants;
+import java.util.Scanner;
 
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -175,7 +167,6 @@ class Stratum implements Comparable<Stratum> {
 
 	@Override
 	public int compareTo(Stratum arg0) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 	
@@ -268,62 +259,7 @@ class DataItem implements Comparable<DataItem> {
 }
 
 class SampleData {
-
-	public static Connection setUpDBConnection(String dbName) throws SQLException {
-		/** Sets up the database connection for the Sampler internal
-		 *  database.
-		 *  Returns the connection to the DB.
-		 */
-		
-		// define the driver to use 
-		 String driver = "org.apache.derby.jdbc.EmbeddedDriver";
-		// define the Derby connection URL to use 
-		 String connectionURL = "jdbc:sqlserver:" + dbName + ";ReadOnly=true";
-		// the Sampler database connection -- return value
-		Connection conn = null;
-		 
-		//  Beginning of Primary DB access section
-		//   ## BOOT DATABASE SECTION ##
-        // Create (if needed) and connect to the database.
-        // The driver is loaded automatically.
-		conn = DriverManager.getConnection(connectionURL);		 
-		System.out.println("Connected to database " + dbName);
-		 
-		 return conn;
-	}
-
 	
-	
-	public static ArrayList<DataItem> readData(Connection conn, String client_id, String client_name) throws SQLException{
-
-		String sqlCommand = "";
-		Statement s;
-		int status = 0;  // status flag: 1 = ok;
-
-		s = conn.createStatement();
-		ResultSet rs;
-		sqlCommand = "Select client_id" + 
-				"                ,client_name" + 
-				"from odwrs_test.dbo.tbl_clients" + 
-				"order by left(client_name,charindex('(',client_name))" + 
-				"                ,client_id";
-
-		s.execute(sqlCommand);
-		sqlCommand = "Select top 999 Claim_Number" + 
-				"                                ,Line_Number" + 
-				"                                ,paid_amount" + 
-				"                                ,rec_id" + 
-				"                from odwrs_test.dbo.tbl_claims_66114";
-		System.out.println("");
-		
-		
-		
-		
-		
-		ArrayList<DataItem> result = new ArrayList<DataItem>();
-		return result;
-		
-	}
 	
 	public static int loadClaimsData(ArrayList<DataItem> dataList, String dataFileName) throws IOException {
 		
@@ -416,10 +352,8 @@ class SampleData {
 			int dataStartRow = -1;
 			for(int i = 0; headersLoaded == false; i++) {
 				XSSFRow row = inputSheet.getRow(i);
-				System.out.println(row.getCell(0).getStringCellValue());
 				for(int j = 0; row.getCell(j).getStringCellValue() != null; j++) {
 					String currElement =  row.getCell(j).getStringCellValue().toLowerCase();
-					System.out.println(currElement);
 					if(currElement.equals("obs") || currElement.equals("obsnum") || currElement.equals("oberservationnum") || 
 							currElement.equals("obsnumber") || currElement.contains("obs")) { //Find observation number, this should be updated with more criteria
 						obsIndex = j;
@@ -436,9 +370,6 @@ class SampleData {
 				}
 			}
 			nLoaded = 0;
-			System.out.println(obsIndex);
-			System.out.println(amntIndex);
-			System.out.println(inputSheet.getLastRowNum());
 			for(int i = dataStartRow; i <= inputSheet.getLastRowNum(); i++) {
 				XSSFRow row = inputSheet.getRow(i);
 				int obsNum = (int)row.getCell(obsIndex).getNumericCellValue();
@@ -449,7 +380,7 @@ class SampleData {
 					nLoaded++;
 				}
 			}
-			System.out.println(nLoaded);
+			workbook.close();
 			return nLoaded;
 		}else {
 			System.out.println("File error");
@@ -530,6 +461,11 @@ public class SamplerMainClass {
 	public static int nTrialStrata = 100;  //Number of trial strata to start with
 	public static double confLevel = 99.0;
 	public static int nClaimsInDataFile;
+	public static double popMean;
+	public static double sampleMean;
+	public static double gAbsDiff;
+	public static double gPerDiff;
+	public static  SamplerGUI2 currWindow;
 	
 	public static void main(String[] args) throws SQLException, InterruptedException, IOException {
 		
@@ -544,7 +480,7 @@ public class SamplerMainClass {
 					// lowerBound (inclusive), stratumSampleSize, stratumTotalAmount, stratumNumClaims, 
 		ArrayList<Stratum> majorStrata = new ArrayList<>();  // holds the final Major Strata
 		sampleClaims = new ArrayList<>();  //holds the claims sample that is drawn
-		SamplerGUI2 currWindow = new SamplerGUI2(); //GUI window to make references to inside main
+		currWindow = new SamplerGUI2(); //GUI window to make references to inside main
 
 
 		/* Invoke the UI home page */
@@ -665,22 +601,29 @@ public class SamplerMainClass {
 			 * Code below generates statistics on current sample and prints both to console and GUI draw panel
 			 */
 			System.out.println("=========================================");
-			 double x = getPopMean(claimsData);
-			currWindow.lblMeanClaimAmnt.setText(String.valueOf(x));
+			double x = getPopMean(claimsData);
 			System.out.println("Pop mean: " + x);
 			
 			double y = getWeightedSampleMean(sampleClaims, finStrata);
-			currWindow.WeightedSampleMeanVal.setText(String.valueOf(y));
 			System.out.println("Weighted sample mean: " + y);
 			
 			double abDiff = getAbsDiff(x, y);
-			currWindow.AbsoluteDiffVal.setText(String.valueOf(abDiff));
 			System.out.println("Absolute Difference: " + abDiff);
 			
 			perdif = getPerDiff(getAbsDiff(x, y), x);
-			currWindow.PercentageDiffVal.setText(String.valueOf(perdif) + "%");
 			System.out.println("Percentage difference: " + getPerDiff(getAbsDiff(x, y), x) + "%");
-
+			
+			if(perdif < precision) {
+				currWindow.lblMeanClaimAmnt.setText(String.valueOf(x));
+				popMean = x;
+				currWindow.WeightedSampleMeanVal.setText(String.valueOf(y));
+				sampleMean = y;
+				currWindow.AbsoluteDiffVal.setText(String.valueOf(abDiff));
+				gAbsDiff = abDiff;
+				currWindow.PercentageDiffVal.setText(String.valueOf(perdif) + "%");
+				gPerDiff = perdif;
+			}
+			
 			System.out.println("=========================================");
 			if((perdif < precision) == false) { //Clear out arrayLists so Algorithm can run again
 				trialStrata.clear();
@@ -741,29 +684,7 @@ public class SamplerMainClass {
 		}
 		return roundToTwo(result);
 	}
-	/*
-	 * Calculates weighted sample mean for small samples
-	 */
-	public static double getWeightedSampleMeanSmall(ArrayList<DataItem> sampleCLaims, ArrayList<Stratum> finStrata) {
-		double result = 0;
-		double divisor = sampleClaims.size();
-		for(int i = 0; i < finStrata.size() - 1; i++) { //Use strata 0 to 20, omit 21 because it skews the weighted mean
-			int currStratSize = 0;
-			double currStratAmnt = 0;
-			for(int j = 0; j < sampleCLaims.size(); j++) {
-				if (sampleClaims.get(j).stratumNum == i) {
-					currStratSize++;
-					currStratAmnt += sampleClaims.get(j).amount;
-					
-				}
-			}
-			double currMean = currStratAmnt / currStratSize;
 
-			result += (currMean);
-		}
-		return roundToTwo(result / divisor);
-	}
-	
 	/*
 	 * Returns absolute difference of pop mean and weighted sample mean
 	 */

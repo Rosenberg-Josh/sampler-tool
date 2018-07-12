@@ -1,56 +1,23 @@
 package SamplerPackage;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.awt.Font;
-import javax.swing.SwingConstants;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
-import java.awt.CardLayout;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.plaf.FileChooserUI;
-
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-
-import java.awt.SystemColor;
 
 import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import javax.swing.Box;
-import javax.swing.ImageIcon;
-
-import java.awt.Dimension;
-import java.awt.Color;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import javax.swing.SpringLayout;
-import java.awt.Button;
-import javax.swing.JTable;
-import javax.swing.JList;
-import javax.swing.ListSelectionModel;
-import javax.swing.AbstractListModel;
-import javax.swing.JPopupMenu;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 public class SamplerGUI2 {
@@ -140,7 +107,9 @@ public class SamplerGUI2 {
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.getContentPane().setLayout(new GridLayout(1, 0, 0, 0));
 		
-
+		/*
+		 * Process Image for use in background
+		 */
 		Image img = null;
 		File imgRel = new File("GallagherBackgroung.PNG");
 		try{
@@ -150,9 +119,7 @@ public class SamplerGUI2 {
 		}
 
 		
-		
 		BackgroundPanel bpanel = new BackgroundPanel(img);
-
 		mainFrame.getContentPane().add(bpanel);
 		SpringLayout sl_loadPanel = new SpringLayout();
 		bpanel.setLayout(sl_loadPanel);
@@ -225,6 +192,7 @@ public class SamplerGUI2 {
 				        	dataFile.renameTo(new File(chosenDir + "\\" + "AUDIT_SAMPLE_FOR_" + dataFile.toString())); //Move file to chosen directory
 				        	statFile.renameTo(new File(chosenDir + "\\" + "AUDIT_STATS_FOR_" + dataFile.toString())); //Move file to chosen directory
 				        	ExcelWriter.writeToTemplate(chosenDir, SamplerMainClass.sampleClaims, SamplerMainClass.finStrata);
+				        	//ExcelWriter.writeSample(SamplerMainClass.sampleClaims, SamplerMainClass.finStrata, desFileName, chosenDir);
 				            filePath.setText(dataFile.getPath());
 				            if(dataFile.getName().endsWith(".csv")) {
 				            		dataLoadedCorrectly = true;
@@ -253,14 +221,14 @@ public class SamplerGUI2 {
 		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblMeanClaimAmnt, 0, SpringLayout.NORTH, MeanClaimAmount);
 		lblMeanClaimAmnt.setText("Sampling in Progress\n");
 		drawPanel.add(lblMeanClaimAmnt);
-		lblMeanClaimAmnt.setVisible(false);
+		//lblMeanClaimAmnt.setVisible(false);
 		
 		WeightedSampleMeanVal = new JLabel();
 		sl_drawPanel.putConstraint(SpringLayout.WEST, lblMeanClaimAmnt, 0, SpringLayout.WEST, WeightedSampleMeanVal);
 		sl_drawPanel.putConstraint(SpringLayout.NORTH, WeightedSampleMeanVal, 0, SpringLayout.NORTH, lblEnteredNameOf);
 		WeightedSampleMeanVal.setText("N/A\n");
 		drawPanel.add(WeightedSampleMeanVal);
-		WeightedSampleMeanVal.setVisible(false);
+		//WeightedSampleMeanVal.setVisible(false);
 		
 		JLabel lblWeightedSampleMean = new JLabel("Weighted Sample Mean: ");
 		sl_drawPanel.putConstraint(SpringLayout.WEST, lblWeightedSampleMean, 41, SpringLayout.WEST, drawPanel);
@@ -278,7 +246,7 @@ public class SamplerGUI2 {
 		sl_drawPanel.putConstraint(SpringLayout.WEST, AbsoluteDiffVal, 98, SpringLayout.EAST, lblAbsoluteDifference);
 		AbsoluteDiffVal.setText("N/A");
 		drawPanel.add(AbsoluteDiffVal);
-		AbsoluteDiffVal.setVisible(false);
+		//AbsoluteDiffVal.setVisible(false);
 		
 		JLabel lblPercentageDifference = new JLabel("Percentage Difference:");
 		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblPercentageDifference, 5, SpringLayout.NORTH, btnExportTocsv);
@@ -292,22 +260,15 @@ public class SamplerGUI2 {
 		//sl_drawPanel.putConstraint(SpringLayout.SOUTH, PercentageDiffVal, 0, SpringLayout.NORTH, lblPercentageDifference);
 		//sl_drawPanel.putConstraint(SpringLayout.EAST, PercentageDiffVal, 0, SpringLayout.EAST, lblMeanClaimAmnt);
 		drawPanel.add(PercentageDiffVal);
-		PercentageDiffVal.setVisible(false);
+		//PercentageDiffVal.setVisible(false);
 		
 		StandardizedDiffVal = new JLabel();
 		sl_drawPanel.putConstraint(SpringLayout.SOUTH, StandardizedDiffVal, -171, SpringLayout.SOUTH, drawPanel);
 		sl_drawPanel.putConstraint(SpringLayout.EAST, StandardizedDiffVal, -332, SpringLayout.EAST, drawPanel);
 		drawPanel.add(StandardizedDiffVal);
 		
-		JLabel gLogo2 = new JLabel("");
-		sl_drawPanel.putConstraint(SpringLayout.SOUTH, gLogo2, -31, SpringLayout.SOUTH, drawPanel);
-		sl_drawPanel.putConstraint(SpringLayout.EAST, gLogo2, -86, SpringLayout.WEST, btnDone);
-		File image = new File("gallagher_wtag_stackedlarge-3d-1.png");
-		gLogo2.setIcon(new ImageIcon("/Users/joshrosenberg/eclipse-workspace/Sampling.Tool/gallagher_wtag_stackedlarge-3d-1.png"));
-		drawPanel.add(gLogo2);
 		
-		
-		JLabel lblSelectCsvFile = new JLabel("Select csv file or specify absolute path:");
+		JLabel lblSelectCsvFile = new JLabel("Select csv or excel file: ");
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, lblSelectCsvFile, 144, SpringLayout.NORTH, bpanel);
 		sl_loadPanel.putConstraint(SpringLayout.WEST, lblSelectCsvFile, -576, SpringLayout.EAST, bpanel);
 		sl_loadPanel.putConstraint(SpringLayout.SOUTH, lblSelectCsvFile, 169, SpringLayout.NORTH, bpanel);
@@ -330,7 +291,6 @@ public class SamplerGUI2 {
 
 			        if (returnVal == JFileChooser.APPROVE_OPTION) {
 			            dataFile = openFileChooser.getSelectedFile();
-			            //This is where a real application would open the file.
 			            filePath.setText(dataFile.getPath());
 			            if(dataFile.getName().endsWith(".csv") || dataFile.getName().contains(".xl")) {
 			            		dataLoadedCorrectly = true;
@@ -473,6 +433,14 @@ public class SamplerGUI2 {
 		
 	}
 
+	public JTextField getFileNameInput() {
+		return fileNameInput;
+	}
+
+	public void setFileNameInput(JTextField fileNameInput) {
+		this.fileNameInput = fileNameInput;
+	}
+
 	public JTextField getConfidence_LevelField() {
 		return Confidence_LevelField;
 	}
@@ -513,4 +481,3 @@ public class SamplerGUI2 {
 		this.zeroDollarClaimsField = zeroDollarClaimsField;
 	}
 }
-
