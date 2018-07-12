@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.SwingConstants;
 
 
 public class SamplerGUI2 {
@@ -38,7 +39,6 @@ public class SamplerGUI2 {
 	JLabel WeightedSampleMeanVal;
 	JLabel AbsoluteDiffVal;
 	JLabel PercentageDiffVal;
-	JLabel StandardizedDiffVal;
 	private JTextField sampleSizeField;
 	private JTextField numberOfStrataField;
 	private JTextField topClaimsField;
@@ -120,14 +120,14 @@ public class SamplerGUI2 {
 
 		
 		BackgroundPanel bpanel = new BackgroundPanel(img);
-		mainFrame.getContentPane().add(bpanel);
+		//mainFrame.getContentPane().add(bpanel);
 		SpringLayout sl_loadPanel = new SpringLayout();
 		bpanel.setLayout(sl_loadPanel);
 		
 
 		BackgroundPanel drawPanel = new BackgroundPanel(img);
 		drawPanel.setBackground(Color.LIGHT_GRAY);
-		//mainFrame.getContentPane().add(drawPanel);
+		mainFrame.getContentPane().add(drawPanel);
 		SpringLayout sl_drawPanel = new SpringLayout();
 		drawPanel.setLayout(sl_drawPanel);
 		
@@ -152,13 +152,11 @@ public class SamplerGUI2 {
 		drawPanel.add(btnCancel_1);
 		
 		JLabel lblSampleSize = new JLabel("Sample Info:");
-		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblSampleSize, 73, SpringLayout.NORTH, drawPanel);
-		sl_drawPanel.putConstraint(SpringLayout.WEST, lblSampleSize, 41, SpringLayout.WEST, drawPanel);
 		drawPanel.add(lblSampleSize);
 		
 		JLabel MeanClaimAmount = new JLabel("Population Mean Claim Amount: ");
-		sl_drawPanel.putConstraint(SpringLayout.NORTH, MeanClaimAmount, 20, SpringLayout.SOUTH, lblSampleSize);
-		sl_drawPanel.putConstraint(SpringLayout.WEST, MeanClaimAmount, 41, SpringLayout.WEST, drawPanel);
+		sl_drawPanel.putConstraint(SpringLayout.WEST, lblSampleSize, 0, SpringLayout.WEST, MeanClaimAmount);
+		sl_drawPanel.putConstraint(SpringLayout.SOUTH, lblSampleSize, -27, SpringLayout.NORTH, MeanClaimAmount);
 		drawPanel.add(MeanClaimAmount);
 		
 		
@@ -218,7 +216,8 @@ public class SamplerGUI2 {
 		drawPanel.add(lblEnteredNameOf);
 		
 		lblMeanClaimAmnt = new JLabel();
-		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblMeanClaimAmnt, 0, SpringLayout.NORTH, MeanClaimAmount);
+		sl_drawPanel.putConstraint(SpringLayout.NORTH, MeanClaimAmount, 0, SpringLayout.NORTH, lblMeanClaimAmnt);
+		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblMeanClaimAmnt, 109, SpringLayout.NORTH, drawPanel);
 		lblMeanClaimAmnt.setText("Sampling in Progress\n");
 		drawPanel.add(lblMeanClaimAmnt);
 		//lblMeanClaimAmnt.setVisible(false);
@@ -226,53 +225,47 @@ public class SamplerGUI2 {
 		WeightedSampleMeanVal = new JLabel();
 		sl_drawPanel.putConstraint(SpringLayout.WEST, lblMeanClaimAmnt, 0, SpringLayout.WEST, WeightedSampleMeanVal);
 		sl_drawPanel.putConstraint(SpringLayout.NORTH, WeightedSampleMeanVal, 0, SpringLayout.NORTH, lblEnteredNameOf);
+		WeightedSampleMeanVal.setVerticalAlignment(SwingConstants.TOP);
 		WeightedSampleMeanVal.setText("N/A\n");
 		drawPanel.add(WeightedSampleMeanVal);
 		//WeightedSampleMeanVal.setVisible(false);
 		
 		JLabel lblWeightedSampleMean = new JLabel("Weighted Sample Mean: ");
-		sl_drawPanel.putConstraint(SpringLayout.WEST, lblWeightedSampleMean, 41, SpringLayout.WEST, drawPanel);
+		sl_drawPanel.putConstraint(SpringLayout.WEST, MeanClaimAmount, 0, SpringLayout.WEST, lblWeightedSampleMean);
+		sl_drawPanel.putConstraint(SpringLayout.WEST, WeightedSampleMeanVal, 75, SpringLayout.EAST, lblWeightedSampleMean);
+		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblWeightedSampleMean, 0, SpringLayout.NORTH, lblEnteredNameOf);
 		drawPanel.add(lblWeightedSampleMean);
 		
 		JLabel lblAbsoluteDifference = new JLabel("Absolute Difference:");
-		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblAbsoluteDifference, 178, SpringLayout.NORTH, drawPanel);
-		sl_drawPanel.putConstraint(SpringLayout.SOUTH, lblWeightedSampleMean, -17, SpringLayout.NORTH, lblAbsoluteDifference);
-		sl_drawPanel.putConstraint(SpringLayout.WEST, lblAbsoluteDifference, 41, SpringLayout.WEST, drawPanel);
+		sl_drawPanel.putConstraint(SpringLayout.WEST, lblWeightedSampleMean, 0, SpringLayout.WEST, lblAbsoluteDifference);
+		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblAbsoluteDifference, 5, SpringLayout.NORTH, fileNameInput);
+		sl_drawPanel.putConstraint(SpringLayout.WEST, lblAbsoluteDifference, 37, SpringLayout.WEST, drawPanel);
 		drawPanel.add(lblAbsoluteDifference);
 		
 		AbsoluteDiffVal = new JLabel();
-		sl_drawPanel.putConstraint(SpringLayout.EAST, WeightedSampleMeanVal, 0, SpringLayout.EAST, AbsoluteDiffVal);
 		sl_drawPanel.putConstraint(SpringLayout.NORTH, AbsoluteDiffVal, 5, SpringLayout.NORTH, fileNameInput);
-		sl_drawPanel.putConstraint(SpringLayout.WEST, AbsoluteDiffVal, 98, SpringLayout.EAST, lblAbsoluteDifference);
+		sl_drawPanel.putConstraint(SpringLayout.WEST, AbsoluteDiffVal, 0, SpringLayout.WEST, lblMeanClaimAmnt);
+		AbsoluteDiffVal.setVerticalAlignment(SwingConstants.TOP);
 		AbsoluteDiffVal.setText("N/A");
 		drawPanel.add(AbsoluteDiffVal);
-		//AbsoluteDiffVal.setVisible(false);
-		
-		JLabel lblPercentageDifference = new JLabel("Percentage Difference:");
-		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblPercentageDifference, 5, SpringLayout.NORTH, btnExportTocsv);
-		sl_drawPanel.putConstraint(SpringLayout.WEST, lblPercentageDifference, 0, SpringLayout.WEST, lblSampleSize);
-		drawPanel.add(lblPercentageDifference);
 		
 		PercentageDiffVal = new JLabel();
-		sl_drawPanel.putConstraint(SpringLayout.NORTH, PercentageDiffVal, 5, SpringLayout.NORTH, btnExportTocsv);
-		sl_drawPanel.putConstraint(SpringLayout.WEST, PercentageDiffVal, 86, SpringLayout.EAST, lblPercentageDifference);
+		sl_drawPanel.putConstraint(SpringLayout.NORTH, PercentageDiffVal, 11, SpringLayout.SOUTH, AbsoluteDiffVal);
+		PercentageDiffVal.setVerticalAlignment(SwingConstants.TOP);
 		PercentageDiffVal.setText("N/A");
 		//sl_drawPanel.putConstraint(SpringLayout.SOUTH, PercentageDiffVal, 0, SpringLayout.NORTH, lblPercentageDifference);
 		//sl_drawPanel.putConstraint(SpringLayout.EAST, PercentageDiffVal, 0, SpringLayout.EAST, lblMeanClaimAmnt);
 		drawPanel.add(PercentageDiffVal);
-		//PercentageDiffVal.setVisible(false);
 		
-		StandardizedDiffVal = new JLabel();
-		sl_drawPanel.putConstraint(SpringLayout.SOUTH, StandardizedDiffVal, -171, SpringLayout.SOUTH, drawPanel);
-		sl_drawPanel.putConstraint(SpringLayout.EAST, StandardizedDiffVal, -332, SpringLayout.EAST, drawPanel);
-		drawPanel.add(StandardizedDiffVal);
+		JLabel lblPercentageDifference = new JLabel("Percentage Difference: ");
+		sl_drawPanel.putConstraint(SpringLayout.WEST, lblPercentageDifference, 37, SpringLayout.WEST, drawPanel);
+		sl_drawPanel.putConstraint(SpringLayout.WEST, PercentageDiffVal, 82, SpringLayout.EAST, lblPercentageDifference);
+		sl_drawPanel.putConstraint(SpringLayout.NORTH, lblPercentageDifference, 5, SpringLayout.NORTH, btnExportTocsv);
+		drawPanel.add(lblPercentageDifference);
 		
 		
-		JLabel lblSelectCsvFile = new JLabel("Select csv or excel file: ");
+		JLabel lblSelectCsvFile = new JLabel("Select data file: ");
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, lblSelectCsvFile, 144, SpringLayout.NORTH, bpanel);
-		sl_loadPanel.putConstraint(SpringLayout.WEST, lblSelectCsvFile, -576, SpringLayout.EAST, bpanel);
-		sl_loadPanel.putConstraint(SpringLayout.SOUTH, lblSelectCsvFile, 169, SpringLayout.NORTH, bpanel);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, lblSelectCsvFile, -317, SpringLayout.EAST, bpanel);
 		lblSelectCsvFile.setBackground(Color.BLACK);
 		bpanel.add(lblSelectCsvFile);
 		
@@ -281,8 +274,9 @@ public class SamplerGUI2 {
 		 * 
 		 */
 		JButton btnOpenFile = new JButton("Open File...");
+		sl_loadPanel.putConstraint(SpringLayout.WEST, lblSelectCsvFile, -189, SpringLayout.WEST, btnOpenFile);
+		sl_loadPanel.putConstraint(SpringLayout.EAST, lblSelectCsvFile, -6, SpringLayout.WEST, btnOpenFile);
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, btnOpenFile, 143, SpringLayout.NORTH, bpanel);
-		sl_loadPanel.putConstraint(SpringLayout.WEST, btnOpenFile, 6, SpringLayout.EAST, lblSelectCsvFile);
 		btnOpenFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//Handle open button action.
@@ -306,9 +300,11 @@ public class SamplerGUI2 {
 		bpanel.add(btnOpenFile);
 		
 		filePath = new JTextField();
-		sl_loadPanel.putConstraint(SpringLayout.NORTH, filePath, 143, SpringLayout.NORTH, bpanel);
-		sl_loadPanel.putConstraint(SpringLayout.WEST, filePath, 6, SpringLayout.EAST, btnOpenFile);
+		sl_loadPanel.putConstraint(SpringLayout.WEST, btnOpenFile, -121, SpringLayout.WEST, filePath);
+		sl_loadPanel.putConstraint(SpringLayout.EAST, btnOpenFile, -6, SpringLayout.WEST, filePath);
+		sl_loadPanel.putConstraint(SpringLayout.WEST, filePath, -190, SpringLayout.EAST, bpanel);
 		sl_loadPanel.putConstraint(SpringLayout.EAST, filePath, -18, SpringLayout.EAST, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.NORTH, filePath, 143, SpringLayout.NORTH, bpanel);
 		bpanel.add(filePath);
 		filePath.setColumns(10);
 		
@@ -345,16 +341,15 @@ public class SamplerGUI2 {
 		sampleSizeField.setColumns(10);
 		
 		numberOfStrataField = new JTextField();
-		sl_loadPanel.putConstraint(SpringLayout.NORTH, numberOfStrataField, 224, SpringLayout.NORTH, bpanel);
-		sl_loadPanel.putConstraint(SpringLayout.WEST, sampleSizeField, 0, SpringLayout.WEST, numberOfStrataField);
 		sl_loadPanel.putConstraint(SpringLayout.SOUTH, sampleSizeField, -6, SpringLayout.NORTH, numberOfStrataField);
+		sl_loadPanel.putConstraint(SpringLayout.NORTH, numberOfStrataField, 224, SpringLayout.NORTH, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.SOUTH, numberOfStrataField, 250, SpringLayout.NORTH, bpanel);
 		bpanel.add(numberOfStrataField);
 		numberOfStrataField.setText(String.valueOf(SamplerMainClass.nMajorStrata));
 		numberOfStrataField.setColumns(10);
 		
 		topClaimsField = new JTextField();
-		sl_loadPanel.putConstraint(SpringLayout.SOUTH, numberOfStrataField, -6, SpringLayout.NORTH, topClaimsField);
-		sl_loadPanel.putConstraint(SpringLayout.NORTH, topClaimsField, 256, SpringLayout.NORTH, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.NORTH, topClaimsField, 6, SpringLayout.SOUTH, numberOfStrataField);
 		bpanel.add(topClaimsField);
 		topClaimsField.setText(String.valueOf(SamplerMainClass.nTopNSamples));
 		topClaimsField.setColumns(10);
@@ -365,8 +360,7 @@ public class SamplerGUI2 {
 		bpanel.add(lblZeroDollarClaims);
 		
 		zeroDollarClaimsField = new JTextField();
-		sl_loadPanel.putConstraint(SpringLayout.NORTH, zeroDollarClaimsField, 6, SpringLayout.SOUTH, topClaimsField);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, zeroDollarClaimsField, -120, SpringLayout.EAST, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.NORTH, zeroDollarClaimsField, -5, SpringLayout.NORTH, lblZeroDollarClaims);
 		bpanel.add(zeroDollarClaimsField);
 		zeroDollarClaimsField.setText(String.valueOf(SamplerMainClass.nZeroDollarSamples));
 		zeroDollarClaimsField.setColumns(10);
@@ -377,38 +371,41 @@ public class SamplerGUI2 {
 		bpanel.add(lblConfidenceLevel);
 		
 		Confidence_LevelField = new JTextField();
-		sl_loadPanel.putConstraint(SpringLayout.NORTH, Confidence_LevelField, 6, SpringLayout.SOUTH, zeroDollarClaimsField);
-		sl_loadPanel.putConstraint(SpringLayout.WEST, Confidence_LevelField, 0, SpringLayout.WEST, sampleSizeField);
-		sl_loadPanel.putConstraint(SpringLayout.SOUTH, Confidence_LevelField, 32, SpringLayout.SOUTH, zeroDollarClaimsField);
+		sl_loadPanel.putConstraint(SpringLayout.NORTH, Confidence_LevelField, 11, SpringLayout.SOUTH, zeroDollarClaimsField);
+		sl_loadPanel.putConstraint(SpringLayout.SOUTH, Confidence_LevelField, 37, SpringLayout.SOUTH, zeroDollarClaimsField);
 		bpanel.add(Confidence_LevelField);
 		Confidence_LevelField.setText(String.valueOf(SamplerMainClass.confLevel));
 		Confidence_LevelField.setColumns(10);
 		
 		JLabel lblSamplesize = new JLabel("Sample Size: ");
-		sl_loadPanel.putConstraint(SpringLayout.NORTH, lblSamplesize, 5, SpringLayout.NORTH, sampleSizeField);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, lblSamplesize, -67, SpringLayout.WEST, sampleSizeField);
+		sl_loadPanel.putConstraint(SpringLayout.NORTH, lblSamplesize, 197, SpringLayout.NORTH, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.SOUTH, lblSelectCsvFile, -28, SpringLayout.NORTH, lblSamplesize);
+		sl_loadPanel.putConstraint(SpringLayout.EAST, lblSamplesize, -317, SpringLayout.EAST, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.WEST, sampleSizeField, 67, SpringLayout.EAST, lblSamplesize);
 		bpanel.add(lblSamplesize);
 		
 		JLabel lblNumberOfMain = new JLabel("Number of Main Strata: ");
+		sl_loadPanel.putConstraint(SpringLayout.NORTH, lblNumberOfMain, 16, SpringLayout.SOUTH, lblSamplesize);
 		sl_loadPanel.putConstraint(SpringLayout.WEST, numberOfStrataField, 68, SpringLayout.EAST, lblNumberOfMain);
-		sl_loadPanel.putConstraint(SpringLayout.NORTH, lblNumberOfMain, 5, SpringLayout.NORTH, numberOfStrataField);
 		bpanel.add(lblNumberOfMain);
 		
 		JLabel lblNumberOfTop_1 = new JLabel("Number of Top Claims: ");
+		sl_loadPanel.putConstraint(SpringLayout.EAST, lblNumberOfTop_1, -317, SpringLayout.EAST, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.WEST, topClaimsField, 67, SpringLayout.EAST, lblNumberOfTop_1);
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, lblNumberOfTop_1, 11, SpringLayout.SOUTH, lblNumberOfMain);
 		sl_loadPanel.putConstraint(SpringLayout.WEST, lblNumberOfMain, 0, SpringLayout.WEST, lblNumberOfTop_1);
-		sl_loadPanel.putConstraint(SpringLayout.WEST, topClaimsField, 67, SpringLayout.EAST, lblNumberOfTop_1);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, lblNumberOfTop_1, 0, SpringLayout.EAST, lblSelectCsvFile);
 		bpanel.add(lblNumberOfTop_1);
 		
 		JLabel lblNumberOfZero = new JLabel("Number of Zero Dollar Claims: ");
+		sl_loadPanel.putConstraint(SpringLayout.EAST, lblNumberOfZero, -317, SpringLayout.EAST, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.WEST, zeroDollarClaimsField, 67, SpringLayout.EAST, lblNumberOfZero);
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, lblNumberOfZero, 0, SpringLayout.NORTH, lblZeroDollarClaims);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, lblNumberOfZero, 0, SpringLayout.EAST, lblSelectCsvFile);
 		bpanel.add(lblNumberOfZero);
 		
 		JLabel lblConfidenceLevel_1 = new JLabel("Confidence Level: ");
+		sl_loadPanel.putConstraint(SpringLayout.EAST, lblConfidenceLevel_1, -317, SpringLayout.EAST, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.WEST, Confidence_LevelField, 67, SpringLayout.EAST, lblConfidenceLevel_1);
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, lblConfidenceLevel_1, 21, SpringLayout.SOUTH, lblNumberOfZero);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, lblConfidenceLevel_1, 0, SpringLayout.EAST, lblSelectCsvFile);
 		bpanel.add(lblConfidenceLevel_1);
 		
 		/*
