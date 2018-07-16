@@ -439,6 +439,18 @@ public class SamplerGUI2 {
 		sl_loadPanel.putConstraint(SpringLayout.WEST, comboBox_1, 0, SpringLayout.WEST, comboBox);
 		bpanel.add(comboBox_1);
 		
+		JButton btnNewButton = new JButton("Use Columns");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		sl_loadPanel.putConstraint(SpringLayout.NORTH, btnNewButton, 0, SpringLayout.NORTH, lblSelectObservation);
+		sl_loadPanel.putConstraint(SpringLayout.WEST, btnNewButton, -125, SpringLayout.EAST, bpanel);
+		sl_loadPanel.putConstraint(SpringLayout.SOUTH, btnNewButton, 0, SpringLayout.SOUTH, lblSelectionPaid);
+		sl_loadPanel.putConstraint(SpringLayout.EAST, btnNewButton, -10, SpringLayout.EAST, bpanel);
+		bpanel.add(btnNewButton);
+		
 		/*
 		JLabel gLogoLoad = new JLabel("");
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, gLogoLoad, 123, SpringLayout.SOUTH, filePath);
