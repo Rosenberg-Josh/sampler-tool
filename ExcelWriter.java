@@ -73,25 +73,54 @@ public class ExcelWriter {
 			try {
 				//Write out sample
 				FileInputStream xlsxFile = new FileInputStream(templateFile);
-				String outputName = clientDir + "\\" + "Audit results.xlsx";
+				String outputName = clientDir + "\\" + "Audit results for " + clientName + ".xlsx";
 				XSSFWorkbook workbook = new XSSFWorkbook(xlsxFile);
 				XSSFSheet inputSheet = workbook.getSheetAt(0); //Illegal access		
-				XSSFCell cell = null;
 				File origData = new File(SamplerMainClass.currWindow.getFileNameInput().getText());
-				
+				XSSFWorkbook orWorkbook = new XSSFWorkbook(origData);
+				XSSFSheet orInputSheet = orWorkbook.getSheetAt(0);
 				ArrayList<String> headers = new ArrayList<>();
 				
 				if(origData.getName().contains(".xl")) {
+					System.out.println("XL");
 					XSSFWorkbook originalWB = new XSSFWorkbook(origData);
 					XSSFSheet fSheet = originalWB.getSheetAt(0);
 					XSSFRow headRow = fSheet.getRow(0);
+					headers.add("ObsNum");
+					headers.add("Stratum Num");
 					for(int i = 0; i < headRow.getLastCellNum(); i++) {
 						headers.add(headRow.getCell(i).getStringCellValue());
 					}
+					XSSFRow newHead = inputSheet.createRow(0);
+					for(int j = 0; j < headers.size(); j++) { //Set header values
+						XSSFCell cell = newHead.createCell(j);
+						cell.setCellValue(headers.get(j));
+					}
 					
-				}else if (origData.getName().contains(".csv")) {
-					Scanner cScan = new Scanner(origData);
-					cScan.
+					for(int i = 0; i < sampleClaims.size(); i++) {
+						XSSFRow elementRow = inputSheet.createRow(i + 1);
+						XSSFCell cell = elementRow.createCell(0);
+						cell.setCellValue(sampleClaims.get(i).obsNum);
+						
+						XSSFCell sCell = elementRow.createCell(0);
+						sCell.setCellValue(sampleClaims.get(i).getStratumNum());
+						
+					}
+					
+				}else { //if (origData.getName().contains(".csv")) {
+					XSSFRow headRow = inputSheet.createRow(0);
+					headRow.createCell(0).setCellValue("Observation Num");
+					headRow.createCell(1).setCellValue("Stratum Num");
+					for(int i = 0; i < sampleClaims.size(); i++) {
+						XSSFRow elementRow = inputSheet.createRow(i + 1);
+						XSSFCell cell = elementRow.createCell(0);
+						cell.setCellValue(sampleClaims.get(i).obsNum);
+						
+						XSSFCell sCell = elementRow.createCell(1);
+						sCell.setCellValue(sampleClaims.get(i).getStratumNum());
+						
+					}
+					
 				}
 				
 				
@@ -111,25 +140,33 @@ public class ExcelWriter {
 					statRow.createCell(5).setCellValue(finalStrata.get(i).stratumSampleSize);
 					statRow.createCell(6).setCellValue(finalStrata.get(i).firstClaimPos);
 					statRow.createCell(7).setCellValue(finalStrata.get(i).lastClaimPos);
+					
 
 				}
 				
-				int validityRow = finalStrata.size() + 3;
+				int validityRow = finalStrata.size();
 				XSSFRow meanRow = statsheet.createRow(validityRow);
+				
 				meanRow.createCell(0).setCellValue("Population Mean");
 				meanRow.createCell(1).setCellValue(SamplerMainClass.popMean);
+				validityRow++;
 				
-				XSSFRow sMeanRow = statsheet.createRow(validityRow + 1);
-				meanRow.createCell(0).setCellValue("Weighted Sample Mean");
-				meanRow.createCell(1).setCellValue(SamplerMainClass.sampleMean);
+				XSSFRow sMeanRow = statsheet.createRow(validityRow);
+				sMeanRow.createCell(0).setCellValue("Weighted Sample Mean");
+				sMeanRow.createCell(1).setCellValue(SamplerMainClass.sampleMean);
+				validityRow++;
 				
-				XSSFRow absRow = statsheet.createRow(validityRow + 2);
-				meanRow.createCell(0).setCellValue("Absolute Difference");
-				meanRow.createCell(1).setCellValue(SamplerMainClass.gAbsDiff);
+				XSSFRow absRow = statsheet.createRow(validityRow);
+				absRow.createCell(0).setCellValue("Absolute Difference");
+				absRow.createCell(1).setCellValue(SamplerMainClass.gAbsDiff);
+				validityRow++;
 				
-				XSSFRow perRow = statsheet.createRow(validityRow + 3);
-				meanRow.createCell(0).setCellValue("Percentage Difference");
-				meanRow.createCell(1).setCellValue(SamplerMainClass.gPerDiff);
+				XSSFRow perRow = statsheet.createRow(validityRow);
+				perRow.createCell(0).setCellValue("Percentage Difference");
+				perRow.createCell(1).setCellValue(SamplerMainClass.gPerDiff);
+				
+				statsheet.autoSizeColumn(0);
+				statsheet.autoSizeColumn(1);
 				
 	            FileOutputStream outputStream = new FileOutputStream(outputName);
 	            workbook.write(outputStream);

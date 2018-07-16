@@ -120,14 +120,14 @@ public class SamplerGUI2 {
 
 		
 		BackgroundPanel bpanel = new BackgroundPanel(img);
-		//mainFrame.getContentPane().add(bpanel);
+		mainFrame.getContentPane().add(bpanel);
 		SpringLayout sl_loadPanel = new SpringLayout();
 		bpanel.setLayout(sl_loadPanel);
 		
 
 		BackgroundPanel drawPanel = new BackgroundPanel(img);
 		drawPanel.setBackground(Color.LIGHT_GRAY);
-		mainFrame.getContentPane().add(drawPanel);
+		//mainFrame.getContentPane().add(drawPanel);
 		SpringLayout sl_drawPanel = new SpringLayout();
 		drawPanel.setLayout(sl_drawPanel);
 		
@@ -190,11 +190,12 @@ public class SamplerGUI2 {
 				        	dataFile.renameTo(new File(chosenDir + "\\" + "AUDIT_SAMPLE_FOR_" + dataFile.toString())); //Move file to chosen directory
 				        	statFile.renameTo(new File(chosenDir + "\\" + "AUDIT_STATS_FOR_" + dataFile.toString())); //Move file to chosen directory
 				        	ExcelWriter.writeToTemplate(chosenDir, SamplerMainClass.sampleClaims, SamplerMainClass.finStrata);
-				        	//ExcelWriter.writeSample(SamplerMainClass.sampleClaims, SamplerMainClass.finStrata, desFileName, chosenDir);
+				        	ExcelWriter.writeSample(SamplerMainClass.sampleClaims, SamplerMainClass.finStrata, desFileName, chosenDir);
 				            filePath.setText(dataFile.getPath());
-				            if(dataFile.getName().endsWith(".csv")) {
+				           if(dataFile.getName().endsWith(".csv")) {
 				            		dataLoadedCorrectly = true;
 				            }
+				            
 				        }
 				   } 
 				}
