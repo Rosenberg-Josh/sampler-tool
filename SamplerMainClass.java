@@ -261,7 +261,7 @@ class DataItem implements Comparable<DataItem> {
 class SampleData {
 	
 	
-	public static int loadClaimsData(ArrayList<DataItem> dataList, String dataFileName) throws IOException {
+	public static int loadClaimsData(ArrayList<DataItem> dataList, String dataFileName, SamplerGUI2 currWindow) throws IOException {
 		
 		if(dataFileName.contains(".csv")) {
 			int nLoaded = -1;  //-1 = Error, nothing loaded; positive n = number of claims loaded
@@ -271,12 +271,19 @@ class SampleData {
 			
 			/* Read in the data file */
 			if (in.hasNext()) { 
-				int obsIndex = 999; //Used to refrece observation number from data
-				int amntIndex = 999; //Used to reference amnt paid from data
-				int obsNum = -1;
-				double amntPaid = -1;
 				String headLine = "";
 				headLine = in.nextLine(); //Header Line
+				Scanner headToParse = new Scanner(headLine).useDelimiter(","); //split header into iterative scanner
+				ArrayList<String> heads = new ArrayList<String>();
+				while(headToParse.hasNext()) { //Iterate though entire header
+					String headElement = headToParse.next();
+					currWindow.comboBox.addItem(headElement);
+					currWindow.comboBox_1.addItem(headElement);
+					heads.add(headElement);
+				}
+				currWindow.mainFrame.repaint();
+				
+
 				Scanner headToParse = new Scanner(headLine).useDelimiter(","); //split header into iterative scanner
 				int index = 0; //Starting Index
 				while(headToParse.hasNext()) { //Iterate though entire header
@@ -301,6 +308,7 @@ class SampleData {
 			}
 			
 			//Then the rest of the file -- load into the data array
+			
 			nLoaded = 0;
 			
 			while (in.hasNext()) { //Iterate though each claim line
@@ -386,7 +394,9 @@ class SampleData {
 			System.out.println("File error");
 			return -1;
 		}
+		
 	}
+
 	
 	public static int loadClaimsDataFromSas(ArrayList<DataItem> dataList, String dataFileName) throws FileNotFoundException {
 		
@@ -507,7 +517,8 @@ public class SamplerMainClass {
 		String dataFileName = currWindow.getDataFile().getAbsolutePath();
 
 		nClaimsInDataFile = 0; //Number of claims in entire file (Total Population)
-				
+		
+		nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName, currWindow);
 
 		while(currWindow.nextButtonPressed == false) {
 			try {
@@ -529,7 +540,7 @@ public class SamplerMainClass {
 			minSamplesPerStratum = 9;
 		}
 		
-		nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName);
+		
 		
 		portClaimsData = claimsData; //update global claimsData arraylist so it can be used outside this class
 

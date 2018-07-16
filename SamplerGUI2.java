@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -47,6 +48,9 @@ public class SamplerGUI2 {
 	public boolean nextButtonPressed = false;
 	public File clientDirectory;
 	private JTextField Confidence_LevelField;
+	public static ArrayList<String> headers;
+	public static JComboBox comboBox;
+	public static JComboBox comboBox_1;
 
 	
 	public File getClientDirectory() {
@@ -418,7 +422,8 @@ public class SamplerGUI2 {
 		sl_loadPanel.putConstraint(SpringLayout.SOUTH, lblSelectCsvFile, -20, SpringLayout.NORTH, lblSelectObservation);
 		bpanel.add(lblSelectObservation);
 		
-		JComboBox comboBox = new JComboBox();
+		
+		comboBox = new JComboBox();
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, comboBox, 147, SpringLayout.NORTH, bpanel);
 		sl_loadPanel.putConstraint(SpringLayout.WEST, comboBox, 350, SpringLayout.WEST, bpanel);
 		sl_loadPanel.putConstraint(SpringLayout.EAST, lblSelectObservation, -67, SpringLayout.WEST, comboBox);
@@ -429,7 +434,7 @@ public class SamplerGUI2 {
 		sl_loadPanel.putConstraint(SpringLayout.EAST, lblSelectionPaid, 0, SpringLayout.EAST, lblSamplesize);
 		bpanel.add(lblSelectionPaid);
 		
-		JComboBox comboBox_1 = new JComboBox();
+		comboBox_1 = new JComboBox();
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, comboBox_1, 6, SpringLayout.SOUTH, comboBox);
 		sl_loadPanel.putConstraint(SpringLayout.WEST, comboBox_1, 0, SpringLayout.WEST, comboBox);
 		bpanel.add(comboBox_1);
