@@ -21,6 +21,7 @@ import javax.swing.SpringLayout;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.SwingConstants;
 import javax.swing.JComboBox;
+import java.awt.Toolkit;
 
 
 public class SamplerGUI2 {
@@ -102,6 +103,7 @@ public class SamplerGUI2 {
 		
 		/*  Create main frame */
 		mainFrame = new JFrame();
+		mainFrame.setResizable(false);
 		mainFrame.getContentPane().addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -308,7 +310,7 @@ public class SamplerGUI2 {
 		filePath.setColumns(10);
 		
 		JButton btnNext = new JButton("Next");
-		btnNext.setBounds(515, 392, 75, 29);
+		btnNext.setBounds(505, 378, 75, 29);
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(dataLoadedCorrectly == true) {
@@ -323,7 +325,7 @@ public class SamplerGUI2 {
 		bpanel.add(btnNext);
 		
 		JButton btnCancel = new JButton("Cancel");
-		btnCancel.setBounds(10, 392, 86, 29);
+		btnCancel.setBounds(17, 378, 86, 29);
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				mainFrame.dispose();
@@ -395,7 +397,7 @@ public class SamplerGUI2 {
 		
 		
 		comboBox = new JComboBox();
-		comboBox.setBounds(299, 147, 52, 27);
+		comboBox.setBounds(299, 147, 149, 27);
 		bpanel.add(comboBox);
 		
 		JLabel lblSelectionPaid = new JLabel("Selection Paid Amoung Column:");
@@ -403,7 +405,7 @@ public class SamplerGUI2 {
 		bpanel.add(lblSelectionPaid);
 		
 		comboBox_1 = new JComboBox();
-		comboBox_1.setBounds(299, 181, 52, 27);
+		comboBox_1.setBounds(299, 181, 149, 27);
 		bpanel.add(comboBox_1);
 		
 		JButton btnNewButton = new JButton("Use Columns");
