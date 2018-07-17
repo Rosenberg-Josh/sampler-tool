@@ -261,6 +261,7 @@ class DataItem implements Comparable<DataItem> {
 class SampleData {
 	
 	
+
 	public static int loadClaimsData(ArrayList<DataItem> dataList, String dataFileName, SamplerGUI2 currWindow) throws IOException {
 		
 		if(dataFileName.contains(".csv")) {
@@ -283,33 +284,24 @@ class SampleData {
 				}
 				currWindow.mainFrame.repaint();
 				
+				while(SamplerGUI2.columnBtnPushed == false) {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
 
-				Scanner headToParse = new Scanner(headLine).useDelimiter(","); //split header into iterative scanner
+						e.printStackTrace();
+					}
+				}
+				int obsIndex = SamplerGUI2.comboBox.getSelectedIndex();
+				int amntIndex = SamplerGUI2.comboBox_1.getSelectedIndex();
+				
+				
 				int index = 0; //Starting Index
-				while(headToParse.hasNext()) { //Iterate though entire header
-					String currElement = headToParse.next().toLowerCase();
-					
-					if(currElement.equals("obs") || currElement.equals("obsnum") || currElement.equals("oberservationnum") || 
-							currElement.equals("obsnumber") || currElement.contains("obs")) { //Find observation number, this should be updated with more criteria
-						obsIndex = index;
-					
-					}else if(currElement.equals("amtpaid") || currElement.equals("amntpaid") || (currElement.contains("am") 
-							&& currElement.contains("paid")) || (currElement.contains("am") && currElement.contains("pd"))  || (currElement.contains("am") && currElement.contains("pmt"))) { //Find paid amount, this REALLY should be updated with more criteria
-						amntIndex = index;
-					}
-					
-					if(obsIndex != 999 && amntIndex != 999) { //Break if both indexes have been set
-						break;
-					}
-					index++;
-			}
-			if(obsIndex == 999 || amntIndex == 999) {
-				//ERROR, possible to make user specify where field, but will adress in later version
-			}
-			
-			//Then the rest of the file -- load into the data array
-			
+				
 			nLoaded = 0;
+			
+			int obsNum = 0;	
+			double amntPaid = 0;
 			
 			while (in.hasNext()) { //Iterate though each claim line
 				String inputLine = in.nextLine();

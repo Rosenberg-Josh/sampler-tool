@@ -51,6 +51,7 @@ public class SamplerGUI2 {
 	public static ArrayList<String> headers;
 	public static JComboBox comboBox;
 	public static JComboBox comboBox_1;
+	public static boolean columnBtnPushed = false;
 
 	
 	public File getClientDirectory() {
@@ -442,7 +443,7 @@ public class SamplerGUI2 {
 		JButton btnNewButton = new JButton("Use Columns");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				columnBtnPushed = true;
 			}
 		});
 		sl_loadPanel.putConstraint(SpringLayout.NORTH, btnNewButton, 0, SpringLayout.NORTH, lblSelectObservation);
