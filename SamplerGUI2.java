@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -50,7 +51,6 @@ public class SamplerGUI2 {
 	public File clientDirectory;
 	private JTextField Confidence_LevelField;
 	public static ArrayList<String> headers;
-	public static JComboBox comboBox;
 	public static JComboBox comboBox_1;
 	public static boolean columnBtnPushed = false;
 
@@ -136,6 +136,13 @@ public class SamplerGUI2 {
 		//mainFrame.getContentPane().add(drawPanel);
 		SpringLayout sl_drawPanel = new SpringLayout();
 		drawPanel.setLayout(sl_drawPanel);
+		
+		JOptionPane zeroErrorPane = new JOptionPane();
+		//zeroErrorPane.showMessageDialog(bpanel, "zero error");
+		
+		
+		
+		
 		
 		JButton btnDone = new JButton("Done");
 		sl_drawPanel.putConstraint(SpringLayout.SOUTH, btnDone, -10, SpringLayout.SOUTH, drawPanel);
@@ -383,31 +390,18 @@ public class SamplerGUI2 {
 		JLabel lblNumberOfZero = new JLabel("Number of Zero Dollar Claims: ");
 		lblNumberOfZero.setBounds(91, 316, 196, 16);
 		bpanel.add(lblNumberOfZero);
-		/*
-		JLabel lblConfidenceLevel_1 = new JLabel("Confidence Level: ");
-		lblConfidenceLevel_1.setBounds(172, 348, 115, 16);
-		bpanel.add(lblConfidenceLevel_1);
-		*/
-		JLabel lblSelectObservation = new JLabel("Select Observation Number Column:");
-		lblSelectObservation.setBounds(55, 151, 228, 16);
-		bpanel.add(lblSelectObservation);
 		
-		
-		comboBox = new JComboBox();
-		comboBox.setBounds(299, 147, 149, 27);
-		bpanel.add(comboBox);
-		
-		JLabel lblSelectionPaid = new JLabel("Selection Paid Amoung Column:");
-		lblSelectionPaid.setBounds(86, 187, 201, 16);
+		JLabel lblSelectionPaid = new JLabel("Selection Paid Amount Column:");
+		lblSelectionPaid.setBounds(86, 166, 201, 16);
 		bpanel.add(lblSelectionPaid);
 		
 		comboBox_1 = new JComboBox();
-		comboBox_1.setBounds(299, 181, 149, 27);
+		comboBox_1.setBounds(296, 161, 149, 27);
 		bpanel.add(comboBox_1);
 		
-		JButton btnNewButton = new JButton("Use Columns");
+		JButton btnNewButton = new JButton("Confirm Column");
 
-		btnNewButton.setBounds(461, 143, 115, 65);
+		btnNewButton.setBounds(452, 158, 123, 34);
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(comboBox.getSelectedIndex() != comboBox_1.getSelectedIndex()) {
