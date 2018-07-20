@@ -52,6 +52,7 @@ public class SamplerGUI2 {
 	public static ArrayList<String> headers;
 	public static JComboBox comboBox;
 	public static JComboBox comboBox_1;
+	public static boolean columnBtnPushed = false;
 
 	
 	public File getClientDirectory() {
@@ -171,9 +172,7 @@ public class SamplerGUI2 {
 				public void actionPerformed(ActionEvent e) {
 					//Handle open button action.
 					String desFileName = fileNameInput.getText();
-					if(desFileName.endsWith(".csv") == false){
-						desFileName += ".csv";
-					}
+					
 					while(SamplerMainClass.dataProcessed == false) {
 						try {
 							Thread.sleep(1000);
@@ -192,15 +191,11 @@ public class SamplerGUI2 {
 						clientDirectory = chosenDir;
 
 				        if (returnVal == JFileChooser.APPROVE_OPTION) {
-				        	dataFile.renameTo(new File(chosenDir + "\\" + "AUDIT_SAMPLE_FOR_" + dataFile.toString())); //Move file to chosen directory
-				        	statFile.renameTo(new File(chosenDir + "\\" + "AUDIT_STATS_FOR_" + dataFile.toString())); //Move file to chosen directory
-				        	ExcelWriter.writeToTemplate(chosenDir, SamplerMainClass.sampleClaims, SamplerMainClass.finStrata);
+				        	dataFile.delete();
+				        	statFile.delete();
+				        	ExcelWriter.writeToTemplate(chosenDir, SamplerMainClass.sampleClaims, SamplerMainClass.finStrata, desFileName);
 				        	ExcelWriter.writeSample(SamplerMainClass.sampleClaims, SamplerMainClass.finStrata, desFileName, chosenDir);
-				            filePath.setText(dataFile.getPath());
-				           if(dataFile.getName().endsWith(".csv")) {
-				            		dataLoadedCorrectly = true;
-				            }
-				            
+
 				        }
 				   } 
 				}
@@ -365,11 +360,13 @@ public class SamplerGUI2 {
 		lblConfidenceLevel.setBounds(-134, 320, 115, 16);
 		bpanel.add(lblConfidenceLevel);
 		
+		/*
 		Confidence_LevelField = new JTextField();
 		Confidence_LevelField.setBounds(354, 343, 130, 26);
 		bpanel.add(Confidence_LevelField);
 		Confidence_LevelField.setText(String.valueOf(SamplerMainClass.confLevel));
 		Confidence_LevelField.setColumns(10);
+		*/
 		
 		JLabel lblSamplesize = new JLabel("Sample Size: ");
 		lblSamplesize.setBounds(205, 225, 82, 16);
@@ -386,11 +383,11 @@ public class SamplerGUI2 {
 		JLabel lblNumberOfZero = new JLabel("Number of Zero Dollar Claims: ");
 		lblNumberOfZero.setBounds(91, 316, 196, 16);
 		bpanel.add(lblNumberOfZero);
-		
+		/*
 		JLabel lblConfidenceLevel_1 = new JLabel("Confidence Level: ");
 		lblConfidenceLevel_1.setBounds(172, 348, 115, 16);
 		bpanel.add(lblConfidenceLevel_1);
-		
+		*/
 		JLabel lblSelectObservation = new JLabel("Select Observation Number Column:");
 		lblSelectObservation.setBounds(55, 151, 228, 16);
 		bpanel.add(lblSelectObservation);
@@ -409,33 +406,21 @@ public class SamplerGUI2 {
 		bpanel.add(comboBox_1);
 		
 		JButton btnNewButton = new JButton("Use Columns");
+
 		btnNewButton.setBounds(461, 143, 115, 65);
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				if(comboBox.getSelectedIndex() != comboBox_1.getSelectedIndex()) {
+					columnBtnPushed = true;
+					btnNewButton.setOpaque(true);
+					System.out.println(nextButtonPressed);
+					btnNewButton.setBackground(Color.getHSBColor(0.6f, 0.6f, 0.6f));
+					mainFrame.repaint();
+				}
 			}
 		});
 		bpanel.add(btnNewButton);
-		
-		/*
-		JLabel gLogoLoad = new JLabel("");
-		sl_loadPanel.putConstraint(SpringLayout.NORTH, gLogoLoad, 123, SpringLayout.SOUTH, filePath);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, gLogoLoad, -173, SpringLayout.EAST, loadPanel);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, Confidence_LevelField, -6, SpringLayout.WEST, gLogoLoad);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, topClaimsField, -6, SpringLayout.WEST, gLogoLoad);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, numberOfStrataField, -6, SpringLayout.WEST, gLogoLoad);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, sampleSizeField, -6, SpringLayout.WEST, gLogoLoad);
-		sl_loadPanel.putConstraint(SpringLayout.EAST, zeroDollarClaimsField, -6, SpringLayout.WEST, gLogoLoad);
-		File image2 = new File("gallagher_wtag_stackedlarge-3d-1.png");
-		System.out.println(image2.exists());
-		gLogoLoad.setIcon(new ImageIcon(image2.getAbsolutePath()));
-		loadPanel.add(gLogoLoad);
-		
-		JLabel lblNewLabel = new JLabel("");
-		lblNewLabel.setIcon(new ImageIcon("/Users/joshrosenberg/eclipse-workspace/Sampling.Tool/GallagherBackgroung.PNG"));
 
-		loadPanel.add(lblNewLabel);
-		*/
 		
 	}
 

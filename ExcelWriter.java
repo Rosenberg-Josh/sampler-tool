@@ -14,30 +14,38 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-
+/*
+ *  This class contains the methods to populate excel templates with the data obtained from SamplerMainClass and CreateSample classes. 
+ *  Note that this navitages the file system on the office's specific public drive, from where it pulls the model. If this program is to be used on 
+ *  a machine outside of this network, the filepath of the templates will need to be changed.
+ */
 public class ExcelWriter {
 	
-	public static void writeToTemplate(File clientDir, ArrayList<DataItem> finalSample, ArrayList<Stratum> finalStrata){
+	
+	/*
+	 * Method to write in the sample information into the 'Audit Inventory and Results for HCA' template.
+	 */
+	public static void writeToTemplate(File clientDir, ArrayList<DataItem> finalSample, ArrayList<Stratum> finalStrata, String clientName){
 		
-		String fileName = "S:\\Models\\AuditSampling\\Audit Inventory and Results for HCA.xlsm";
-		String outputName = clientDir + "\\" + "Audit Inventory and Results for HCA.xlsm";
+		String fileName = "S:\\Models\\AuditSampling\\Audit Inventory and Results for HCA.xlsm"; //Location of Inventory template sheet, not applicable on out of network machines
+		String outputName = clientDir + "\\" + "Audit Inventory and Results for " + clientName + ".xlsm"; //Location of populated template, where clientDir is specified by used in UI
 		File file = new File(fileName);
 		if(file.exists()) {
 			try {
 	
 				FileInputStream xlsxFile = new FileInputStream(file);
 				XSSFWorkbook workbook = new XSSFWorkbook(xlsxFile);
-				XSSFSheet inputSheet = workbook.getSheetAt(0); //Illegal access		
+				XSSFSheet inputSheet = workbook.getSheetAt(0); //Illegal access, possible that this can be ignored but a further probe would be useful		
 				XSSFCell cell = null;
 				
-				for(int i = 0; i < finalSample.size(); i++) {
+				for(int i = 0; i < finalSample.size(); i++) { //Loop will populate initial inventory sheet of template
 					XSSFRow row = inputSheet.getRow(i + 12);
 					cell = row.getCell(2);
 					cell.setCellValue(finalSample.get(i).stratumNum);
 	
 				}
 				inputSheet = workbook.getSheetAt(2);
-				for(int i = 0; i < finalStrata.size(); i++) {
+				for(int i = 0; i < finalStrata.size(); i++) { //Loop will populate table # 2 with neccessary data, which will copied to other tables when user eneter ctrl + alt + F9
 					XSSFRow row = inputSheet.getRow(i + 10);
 					cell = row.getCell(5);
 					cell.setCellValue(finalStrata.get(i).stratumNumClaims);
@@ -47,7 +55,7 @@ public class ExcelWriter {
 				}
 				
 				
-	            FileOutputStream outputStream = new FileOutputStream(outputName);
+	            FileOutputStream outputStream = new FileOutputStream(outputName); //Write new template file to destination folder
 	            workbook.write(outputStream);
 	            workbook.close();
 	            outputStream.close();
@@ -57,31 +65,38 @@ public class ExcelWriter {
 				e.printStackTrace();
 			}catch (IOException e) {
 				e.printStackTrace();
-			}System.out.println("done");
+			}System.out.println("Template created without errors");
 		}else {
-			System.out.println("No excel template found");
+			System.out.println("No excel template found"); //This will happen if machine is not on networks
 		}
 	}
 	
+	/*
+	 * This method will populate the "Sample_Template.xlsx" template with the sample (obsNum and Stratum number) on sheet 1 and sample stats on sheet 2
+	 */
+	
 	public static void writeSample(ArrayList<DataItem> sampleClaims, ArrayList<Stratum> finalStrata, String clientName, File clientDir) {
 		
-		String templateName = "S:\\Models\\AuditSampling\\Sample_Template.xlsx";
+		String templateName = "S:\\Models\\AuditSampling\\Sample_Template.xlsx"; //File path of template file, must be done on in-network computer
 		File templateFile = new File(templateName);
-		//File origData = new File(origDataFileName);
-		//if(templateFile.exists() && origData.exists()) {
-			if(templateFile.exists()) {
+		if(templateFile.exists()) {
 			try {
 				//Write out sample
+				if(clientName.toLowerCase().endsWith(".csv")) {
+					clientName = clientName.substring(0, clientName.length() - 3);
+				}
+				
+			
 				FileInputStream xlsxFile = new FileInputStream(templateFile);
-				String outputName = clientDir + "\\" + "Audit results for " + clientName + ".xlsx";
+				String outputName = clientDir + "\\" + "Audit sample for " + clientName + ".xlsx"; //Build of file name for populated template
 				XSSFWorkbook workbook = new XSSFWorkbook(xlsxFile);
 				XSSFSheet inputSheet = workbook.getSheetAt(0); //Illegal access		
 				File origData = new File(SamplerMainClass.currWindow.getFileNameInput().getText());
-				XSSFWorkbook orWorkbook = new XSSFWorkbook(origData);
-				XSSFSheet orInputSheet = orWorkbook.getSheetAt(0);
 				ArrayList<String> headers = new ArrayList<>();
 				
-				if(origData.getName().contains(".xl")) {
+				if(origData.getName().contains(".xl")) { //original Data was in xl format
+					XSSFWorkbook orWorkbook = new XSSFWorkbook(origData);
+					XSSFSheet orInputSheet = orWorkbook.getSheetAt(0);
 					System.out.println("XL");
 					XSSFWorkbook originalWB = new XSSFWorkbook(origData);
 					XSSFSheet fSheet = originalWB.getSheetAt(0);
@@ -107,7 +122,7 @@ public class ExcelWriter {
 						
 					}
 					
-				}else { //if (origData.getName().contains(".csv")) {
+				}else{ //Original data was in csv format
 					XSSFRow headRow = inputSheet.createRow(0);
 					headRow.createCell(0).setCellValue("Observation Num");
 					headRow.createCell(1).setCellValue("Stratum Num");
@@ -129,7 +144,7 @@ public class ExcelWriter {
 				 */
 				
 				XSSFSheet statsheet = workbook.getSheetAt(1);
-				for(int i = 0; i < finalStrata.size(); i++) {
+				for(int i = 0; i < finalStrata.size(); i++) { //This loop will populate the template with information on each stratum. Headers should already be present
 					XSSFRow statRow = statsheet.createRow(i + 1);
 					
 					statRow.createCell(0).setCellValue(i);
@@ -140,11 +155,14 @@ public class ExcelWriter {
 					statRow.createCell(5).setCellValue(finalStrata.get(i).stratumSampleSize);
 					statRow.createCell(6).setCellValue(finalStrata.get(i).firstClaimPos);
 					statRow.createCell(7).setCellValue(finalStrata.get(i).lastClaimPos);
+					statRow.createCell(8).setCellValue(SamplerMainClass.roundToTwo(finalStrata.get(i).stratumMean));
+					statRow.createCell(9).setCellValue(SamplerMainClass.roundToTwo(finalStrata.get(i).stratumSD));
+					
 					
 
 				}
 				
-				int validityRow = finalStrata.size();
+				int validityRow = finalStrata.size() + 3;
 				XSSFRow meanRow = statsheet.createRow(validityRow);
 				
 				meanRow.createCell(0).setCellValue("Population Mean");

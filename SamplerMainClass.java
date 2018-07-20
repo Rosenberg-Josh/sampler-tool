@@ -512,6 +512,14 @@ public class SamplerMainClass {
 		
 		nClaimsInDataFile = SampleData.loadClaimsData(claimsData,dataFileName, currWindow);
 
+		while(currWindow.columnBtnPushed == false) {
+			try {
+				Thread.sleep(500);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		while(currWindow.nextButtonPressed == false) {
 			try {
 				Thread.sleep(500);
@@ -524,7 +532,6 @@ public class SamplerMainClass {
 		nTopNSamples = Integer.parseInt(currWindow.getTopClaimsField().getText());
 		nZeroDollarSamples = Integer.parseInt(currWindow.getZeroDollarClaimsField().getText());
 		nMajorStrata = Integer.parseInt(currWindow.getNumberOfStrataField().getText());
-		confLevel = Double.parseDouble(currWindow.getConfidence_LevelField().getText());
 		
 		if(nMajorStrata <= 15 && nMajorStrata > 8) {
 			minSamplesPerStratum = 15;
@@ -543,9 +550,12 @@ public class SamplerMainClass {
 		
 		double precision = (100 - confLevel);
 		
+		boolean sizeIsGood = true;
+		
 		do {
 			
-			
+			sizeIsGood = true;
+			/*
 			if(nMajorStrata > 15) {
 				if(trials > 100 && minSamplesPerStratum > 6) { //Updates min strata size if no valid samples are found within 200 samples
 					minSamplesPerStratum--;
@@ -575,6 +585,8 @@ public class SamplerMainClass {
 					break;
 				}
 			}
+			*/
+			minSamplesPerStratum = 9;
 			
 			double tmptotal = 0;
 			for (int i = 0; i < nClaimsInDataFile; i++) {  //get total amount of payments from entire population of claims
@@ -635,7 +647,9 @@ public class SamplerMainClass {
 			}
 			
 			trials++;
-		} while (perdif > precision); //Make sure to update if statement above if this precision is changed from .5
+			
+			
+		} while (perdif > precision); //Make sure to update if statement above if this precision is changed from .5 // && 
 		System.out.println(trials + " Trials");
 		
 		if(noSampleFound) {
@@ -710,6 +724,22 @@ public class SamplerMainClass {
 		double x = num * 1000;
 		return (Math.round(x) / 1000.0);
 	}
+	
+	/*
+	 * Checks the data to ensure that the density of zero claims is low
+	 */
+	public static double checkZeroClaimDensity(ArrayList<Stratum> finStrata) {
+		int zeroClaims = finStrata.get(0).stratumNumClaims;
+		int totalClaims = 0;
+		for(int i = 0; i < finStrata.size(); i++) {
+			totalClaims += finStrata.get(i).stratumNumClaims;
+		}
+		double ratio = (double)zeroClaims / (double)totalClaims;
+		
+		return ratio;
+	}
+	
+	
 
 }
 
