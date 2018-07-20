@@ -189,30 +189,35 @@ class DataItem implements Comparable<DataItem> {
 	protected int obsNum;
 	protected double amount;
 	protected int stratumNum;
+	protected String data;
 	
 	/* Constructor */
 	public DataItem() {
 		obsNum = 0;
 		amount = 0.0;
 		stratumNum = -1;
+		data = "";
 	}
 	/* Constructor */
-	public DataItem(int o, double a) {
+	public DataItem(int o, double a, String dat) {
 		obsNum = o;
 		amount = a;
 		stratumNum = -1;
+		data = dat;
 	}
 	/* Constructor */
 	public DataItem(DataItem d) {
 		this.obsNum = d.obsNum;
 		this.amount = d.amount;
 		this.stratumNum = d.stratumNum;
+		this.data = d.data;
 	}
 	/* Constructor */
 	public DataItem(int amount) {
 		obsNum = 0;
 		this.amount = amount;
 		stratumNum = -1;
+		data = "";
 	}
 	/* Function to set obsNum */
 	public void setObsNum(int o) {
@@ -260,7 +265,7 @@ class DataItem implements Comparable<DataItem> {
 
 class SampleData {
 	
-	
+	public static ArrayList<String> heads = new ArrayList<String>();
 
 	public static int loadClaimsData(ArrayList<DataItem> dataList, String dataFileName, SamplerGUI2 currWindow) throws IOException {
 		
@@ -275,7 +280,7 @@ class SampleData {
 				String headLine = "";
 				headLine = in.nextLine(); //Header Line
 				Scanner headToParse = new Scanner(headLine).useDelimiter(","); //split header into iterative scanner
-				ArrayList<String> heads = new ArrayList<String>();
+
 				while(headToParse.hasNext()) { //Iterate though entire header
 					String headElement = headToParse.next();
 					currWindow.comboBox.addItem(headElement);
@@ -305,6 +310,7 @@ class SampleData {
 			
 			while (in.hasNext()) { //Iterate though each claim line
 				String inputLine = in.nextLine();
+				String data = inputLine;
 				Scanner lineToParse = new Scanner(inputLine).useDelimiter(",");
 				int currIndex = 0;
 				boolean obsLoaded = false;
@@ -330,7 +336,7 @@ class SampleData {
 	
 	
 				if (amntPaid >= 0) {  //Don't load negative claims --> THIS NEEDS TO BE BETTER ADDRESSED
-					DataItem newClaim = new DataItem(obsNum, amntPaid);
+					DataItem newClaim = new DataItem(obsNum, amntPaid, data);
 					dataList.add(newClaim);
 					nLoaded++;				
 				}
@@ -375,7 +381,7 @@ class SampleData {
 				int obsNum = (int)row.getCell(obsIndex).getNumericCellValue();
 				double amntPaid = row.getCell(amntIndex).getNumericCellValue();
 				if(amntPaid >= 0) {
-					DataItem newClaim = new DataItem(obsNum, amntPaid);
+					DataItem newClaim = new DataItem(obsNum, amntPaid, "null");
 					dataList.add(newClaim);
 					nLoaded++;
 				}

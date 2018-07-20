@@ -74,7 +74,7 @@ public class ExcelWriter {
 	/*
 	 * This method will populate the "Sample_Template.xlsx" template with the sample (obsNum and Stratum number) on sheet 1 and sample stats on sheet 2
 	 */
-	
+
 	public static void writeSample(ArrayList<DataItem> sampleClaims, ArrayList<Stratum> finalStrata, String clientName, File clientDir) {
 		
 		String templateName = "S:\\Models\\AuditSampling\\Sample_Template.xlsx"; //File path of template file, must be done on in-network computer
@@ -124,6 +124,31 @@ public class ExcelWriter {
 					
 				}else{ //Original data was in csv format
 					XSSFRow headRow = inputSheet.createRow(0);
+					int q;
+					for(q = 0; q < SampleData.heads.size(); q++) { //Sets the headers in the spreadsheet
+						headRow.createCell(q).setCellValue(SampleData.heads.get(q));
+					}
+					headRow.createCell(q + 1).setCellValue("Stratum Number");
+					
+					for(int i = 0; i < sampleClaims.size(); i++) { //Write the claim Data;
+						XSSFRow dataRow = inputSheet.createRow(i + 1);
+						Scanner dataToParse = new Scanner(sampleClaims.get(i).data).useDelimiter(",");
+						int j = 0;
+						while(dataToParse.hasNext()) {
+							XSSFCell dataCell = dataRow.createCell(j);
+							dataCell.setCellValue(dataToParse.next());
+							j++;
+						}
+						dataRow.createCell(j).setCellValue(sampleClaims.get(i).stratumNum);
+						dataToParse.close();
+					}
+					
+					for(int i = 0; i < inputSheet.getLastRowNum(); i++) {
+						inputSheet.autoSizeColumn(i);
+					}
+					
+					/*
+					XSSFRow headRow = inputSheet.createRow(0);
 					headRow.createCell(0).setCellValue("Observation Num");
 					headRow.createCell(1).setCellValue("Stratum Num");
 					for(int i = 0; i < sampleClaims.size(); i++) {
@@ -135,7 +160,7 @@ public class ExcelWriter {
 						sCell.setCellValue(sampleClaims.get(i).getStratumNum());
 						
 					}
-					
+					*/
 				}
 				
 				
